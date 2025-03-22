@@ -44,7 +44,7 @@ export default function TopPagesTable({ projectId }: TopPagesTableProps) {
   if (isLoading) {
     return (
       <div className="bg-white p-4 rounded-lg shadow">
-        <h3 className="text-lg font-medium mb-4">Most Visited Pages</h3>
+        <h3 className="text-lg text-black font-medium mb-4">Most Visited Pages</h3>
         <div className="animate-pulse">
           {[...Array(5)].map((_, i) => (
             <div key={i} className="h-8 bg-gray-200 rounded mb-2"></div>
@@ -57,7 +57,7 @@ export default function TopPagesTable({ projectId }: TopPagesTableProps) {
   if (error) {
     return (
       <div className="bg-white p-4 rounded-lg shadow">
-        <h3 className="text-lg font-medium mb-4">Most Visited Pages</h3>
+        <h3 className="text-lg text-black font-medium mb-4">Most Visited Pages</h3>
         <div className="text-center text-red-500">{error}</div>
       </div>
     );
@@ -65,7 +65,7 @@ export default function TopPagesTable({ projectId }: TopPagesTableProps) {
 
   return (
     <div className="bg-white p-4 rounded-lg shadow">
-      <h3 className="text-lg font-medium mb-4">Most Visited Pages</h3>
+      <h3 className="text-lg text-black font-medium mb-4">Most Visited Pages</h3>
       
       {pages.length === 0 ? (
         <div className="text-center text-gray-500 py-4">No page data available yet</div>

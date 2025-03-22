@@ -1,10 +1,9 @@
-// app/projects/[id]/layout.tsx
 "use client";
 
 import Link from 'next/link';
 import { useParams, usePathname } from 'next/navigation';
-
 import { ReactNode } from 'react';
+import BackButton from '@/components/ui/BackButton';
 
 export default function ProjectLayout({ children }: { children: ReactNode }) {
   const params = useParams();
@@ -18,6 +17,11 @@ export default function ProjectLayout({ children }: { children: ReactNode }) {
 
   return (
     <div>
+      {/* Add Back Button */}
+      <div className="mb-4">
+        <BackButton fallbackUrl="/dashboard" />
+      </div>
+      
       <div className="sm:hidden mb-6">
         <label htmlFor="tabs" className="sr-only">
           Select a tab

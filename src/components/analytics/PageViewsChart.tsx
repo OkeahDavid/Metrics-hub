@@ -141,7 +141,7 @@ export default function PageViewsChart({ projectId, days = 7 }: PageViewsChartPr
   return (
     <div className="bg-white p-4 rounded-lg shadow">
       <div className="flex justify-between items-center mb-4">
-        <div className="text-lg font-medium">
+        <div className="text-lg text-black font-medium">
           Total: <span className="text-indigo-600">{totalViews} views</span>
         </div>
         <div className="inline-flex rounded-md shadow-sm">

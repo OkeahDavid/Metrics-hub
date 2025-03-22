@@ -3,6 +3,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import BackButton from '@/components/ui/BackButton';
 
 export default function NewProjectPage() {
   const [name, setName] = useState('');
@@ -35,6 +36,11 @@ export default function NewProjectPage() {
 
   return (
     <div>
+      {/* Add Back Button */}
+      <div className="mb-4">
+        <BackButton fallbackUrl="/dashboard" />
+      </div>
+      
       <h2 className="text-2xl font-bold mb-8">Create New Project</h2>
       
       <form onSubmit={handleSubmit} className="bg-white shadow rounded-lg p-6">
