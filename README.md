@@ -15,7 +15,6 @@ A lightweight, privacy-focused analytics platform for tracking website statistic
 - **Frontend & Backend**: Next.js 14 (App Router)
 - **Database**: PostgreSQL
 - **ORM**: Prisma
-- **Authentication**: NextAuth.js
 - **Visualization**: Chart.js with react-chartjs-2
 - **Styling**: Tailwind CSS
 
@@ -43,8 +42,6 @@ A lightweight, privacy-focused analytics platform for tracking website statistic
    Create a `.env` file in the root directory with:
    ```
    DATABASE_URL="postgresql://username:password@localhost:5432/metrics_hub"
-   NEXTAUTH_SECRET="your-secret-key"
-   NEXTAUTH_URL="http://localhost:3000"
    ```
 
 4. Initialize the database:
@@ -63,7 +60,7 @@ A lightweight, privacy-focused analytics platform for tracking website statistic
 
 ### Adding a Project
 
-1. Sign up/login to your dashboard
+1. Navigate to your dashboard
 2. Create a new project to receive a unique API key
 3. Integrate the tracking script into your website/application
 
@@ -72,7 +69,30 @@ A lightweight, privacy-focused analytics platform for tracking website statistic
 Add the following script to your website:
 
 ```html
-<script async src="https://your-metrics-hub.com/api/tracking-script?apiKey=YOUR_API_KEY"></script>
+<script>
+  (function() {
+    // Generate a session ID
+    let sessionId = localStorage.getItem('metrics_session_id');
+    if (!sessionId) {
+      sessionId = Math.random().toString(36).substring(2, 15);
+      localStorage.setItem('metrics_session_id', sessionId);
+    }
+    
+    // Send pageview data
+    fetch('https://your-metrics-hub.com/api/track', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        projectApiKey: 'YOUR_API_KEY',
+        page: window.location.pathname,
+        referrer: document.referrer,
+        sessionId: sessionId,
+        userAgent: navigator.userAgent,
+        deviceType: /Mobile|Android|iPhone/i.test(navigator.userAgent) ? 'mobile' : 'desktop'
+      })
+    }).catch(err => console.error('Analytics error:', err));
+  })();
+</script>
 ```
 
 ### Viewing Analytics

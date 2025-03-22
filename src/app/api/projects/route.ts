@@ -1,25 +1,23 @@
-import { getServerSession } from 'next-auth/next';
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/db';
-import { authOptions } from '@/lib/auth';
+import crypto from 'crypto';
 
 export async function POST(request: Request) {
   try {
-    const session = await getServerSession(authOptions);
+    const data = await request.json();
+    const { name } = data;
 
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const { name, apiKey } = await request.json();
-
-    if (!name || !apiKey) {
+    if (!name || typeof name !== 'string') {
       return NextResponse.json(
-        { error: 'Name and API key are required' },
+        { error: 'Project name is required' },
         { status: 400 }
       );
     }
 
+    // Generate a random API key
+    const apiKey = crypto.randomBytes(16).toString('hex');
+
+    // Create the project without user association
     const project = await prisma.project.create({
       data: {
         name,
@@ -27,7 +25,7 @@ export async function POST(request: Request) {
       },
     });
 
-    return NextResponse.json(project);
+    return NextResponse.json({ id: project.id, name: project.name, apiKey: project.apiKey });
   } catch (error) {
     console.error('Error creating project:', error);
     return NextResponse.json(
@@ -39,16 +37,10 @@ export async function POST(request: Request) {
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const projects = await prisma.project.findMany({
       orderBy: { createdAt: 'desc' },
     });
-
+    
     return NextResponse.json(projects);
   } catch (error) {
     console.error('Error fetching projects:', error);

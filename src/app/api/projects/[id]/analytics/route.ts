@@ -1,6 +1,5 @@
+// app/api/projects/[id]/analytics/route.ts
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/db';
 import { format, subDays, startOfDay, endOfDay } from 'date-fns';
 
@@ -9,12 +8,6 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const projectId = params.id;
     const { searchParams } = new URL(request.url);
     const daysParam = searchParams.get('days');
@@ -31,8 +24,6 @@ export async function GET(
 
     // Calculate date range
     const endDate = new Date();
-
-    // Get daily page views
     const dailyPageViews = [];
     
     for (let i = 0; i < days; i++) {
