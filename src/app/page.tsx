@@ -1,102 +1,155 @@
-import Image from "next/image";
+import Link from 'next/link';
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="bg-white">
+      <header className="relative">
+        <div className="bg-gray-900 pt-6">
+          <nav className="relative max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6" aria-label="Global">
+            <div className="flex items-center flex-1">
+              <div className="flex items-center justify-between w-full">
+                <h1 className="text-2xl font-bold text-white">Metrics Hub</h1>
+              </div>
+            </div>
+            <div className="flex space-x-4">
+              <Link href="/auth/login" className="text-base font-medium text-white hover:text-gray-300">
+                Login
+              </Link>
+              <Link href="/auth/register" className="text-base font-medium text-white hover:text-gray-300">
+                Sign up
+              </Link>
+            </div>
+          </nav>
+        </div>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+        <div className="relative bg-gray-900 overflow-hidden">
+          <div className="pt-10 pb-16 sm:pb-24">
+            <div className="mt-16 mx-auto max-w-7xl px-4 sm:mt-24 sm:px-6">
+              <div className="text-center">
+                <h1 className="text-4xl tracking-tight font-extrabold text-white sm:text-5xl md:text-6xl">
+                  <span className="block">Privacy-focused</span>
+                  <span className="block text-indigo-400">web analytics</span>
+                </h1>
+                <p className="mt-3 max-w-md mx-auto text-base text-gray-300 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
+                  Track website visitors without compromising user privacy. 
+                  Simple integration, powerful insights, GDPR compliant.
+                </p>
+                <div className="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
+                  <div className="rounded-md shadow">
+                    <Link href="/auth/register" className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 md:py-4 md:text-lg md:px-10">
+                      Get started
+                    </Link>
+                  </div>
+                  <div className="mt-3 rounded-md shadow sm:mt-0 sm:ml-3">
+                    <Link href="/dashboard" className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-indigo-600 bg-white hover:bg-gray-50 md:py-4 md:text-lg md:px-10">
+                      Live demo
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex flex-col">
+              <div className="flex-1"></div>
+              <div className="flex-1 w-full bg-gray-800"></div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main>
+        {/* Feature section */}
+        <div className="py-16 bg-gray-50 overflow-hidden">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center">
+              <h2 className="text-base font-semibold text-indigo-600 tracking-wide uppercase">Features</h2>
+              <p className="mt-1 text-4xl font-extrabold text-gray-900 sm:text-5xl sm:tracking-tight">
+                Analytics that respect privacy
+              </p>
+              <p className="max-w-xl mt-5 mx-auto text-xl text-gray-500">
+                Get the insights you need without collecting personal data.
+              </p>
+            </div>
+
+            <div className="mt-12">
+              <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="pt-6">
+                  <div className="flow-root bg-white rounded-lg px-6 pb-8">
+                    <div className="-mt-6">
+                      <div>
+                        <span className="inline-flex items-center justify-center p-3 bg-indigo-500 rounded-md shadow-lg">
+                          <svg className="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                          </svg>
+                        </span>
+                      </div>
+                      <h3 className="mt-8 text-lg font-medium text-gray-900 tracking-tight">Visitor Insights</h3>
+                      <p className="mt-5 text-base text-gray-500">
+                        Track visitors, page views, and referrers without compromising user privacy.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-6">
+                  <div className="flow-root bg-white rounded-lg px-6 pb-8">
+                    <div className="-mt-6">
+                      <div>
+                        <span className="inline-flex items-center justify-center p-3 bg-indigo-500 rounded-md shadow-lg">
+                          <svg className="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+                          </svg>
+                        </span>
+                      </div>
+                      <h3 className="mt-8 text-lg font-medium text-gray-900 tracking-tight">GDPR Compliant</h3>
+                      <p className="mt-5 text-base text-gray-500">
+                        No cookies required, no personal data collected. Fully compliant with privacy regulations.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-6">
+                  <div className="flow-root bg-white rounded-lg px-6 pb-8">
+                    <div className="-mt-6">
+                      <div>
+                        <span className="inline-flex items-center justify-center p-3 bg-indigo-500 rounded-md shadow-lg">
+                          <svg className="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+                          </svg>
+                        </span>
+                      </div>
+                      <h3 className="mt-8 text-lg font-medium text-gray-900 tracking-tight">Easy Integration</h3>
+                      <p className="mt-5 text-base text-gray-500">
+                        Add a single line of JavaScript to your website and start collecting analytics immediately.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+
+      <footer className="bg-gray-800">
+        <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 md:flex md:items-center md:justify-between lg:px-8">
+          <div className="flex justify-center space-x-6 md:order-2">
+            <a href="#" className="text-gray-400 hover:text-gray-300">
+              <span className="sr-only">GitHub</span>
+              <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
+              </svg>
+            </a>
+          </div>
+          <div className="mt-8 md:mt-0 md:order-1">
+            <p className="text-center text-base text-gray-400">
+              &copy; 2025 Metrics Hub. All rights reserved.
+            </p>
+          </div>
+        </div>
       </footer>
     </div>
   );
