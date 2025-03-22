@@ -10,12 +10,14 @@ interface ProjectPageParams {
 }
 
 export default async function ProjectPage({ params }: ProjectPageParams) {
-    const { id } = params;
+    // Await params before destructuring
+    const resolvedParams = await params;
+    const { id } = resolvedParams;
   
     const project = await prisma.project.findUnique({
       where: { id },
     });
-
+    
   if (!project) {
     return <div className="text-center text-red-500">Project not found</div>;
   }

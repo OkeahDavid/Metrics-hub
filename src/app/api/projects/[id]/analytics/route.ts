@@ -8,7 +8,10 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = params;
+    // Await params before destructuring
+    const resolvedParams = await params;
+    const { id } = resolvedParams;
+    
     const { searchParams } = new URL(request.url);
     const daysParam = searchParams.get('days');
     const days = daysParam ? parseInt(daysParam, 10) : 7;

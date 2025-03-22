@@ -6,7 +6,9 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = params;
+    // Await params before destructuring
+    const resolvedParams = await params;
+    const { id } = resolvedParams;
     const projectId = id;
     
     // Get project to verify it exists
