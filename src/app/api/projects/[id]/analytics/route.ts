@@ -8,14 +8,14 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const projectId = params.id;
+    const { id } = params;
     const { searchParams } = new URL(request.url);
     const daysParam = searchParams.get('days');
     const days = daysParam ? parseInt(daysParam, 10) : 7;
 
     // Get project to verify it exists
     const project = await prisma.project.findUnique({
-      where: { id: projectId },
+      where: { id },
     });
 
     if (!project) {
@@ -35,7 +35,7 @@ export async function GET(
       
       const count = await prisma.pageView.count({
         where: {
-          projectId,
+          projectId: id,
           createdAt: {
             gte: dayStart,
             lte: dayEnd,

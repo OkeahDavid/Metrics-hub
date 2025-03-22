@@ -1,6 +1,4 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/db';
 
 export async function GET(
@@ -8,14 +6,9 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const projectId = params.id;
-
+    const { id } = params;
+    const projectId = id;
+    
     // Get project to verify it exists
     const project = await prisma.project.findUnique({
       where: { id: projectId },

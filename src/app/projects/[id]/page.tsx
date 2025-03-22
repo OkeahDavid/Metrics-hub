@@ -10,11 +10,11 @@ interface ProjectPageParams {
 }
 
 export default async function ProjectPage({ params }: ProjectPageParams) {
-  const projectId = params.id;
+    const { id } = params;
   
-  const project = await prisma.project.findUnique({
-    where: { id: projectId },
-  });
+    const project = await prisma.project.findUnique({
+      where: { id },
+    });
 
   if (!project) {
     return <div className="text-center text-red-500">Project not found</div>;
@@ -59,11 +59,11 @@ export default async function ProjectPage({ params }: ProjectPageParams) {
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="lg:col-span-2">
-          <PageViewsChart projectId={projectId} />
+          <PageViewsChart projectId={project.id} />
         </div>
         
         <div>
-          <DeviceTypeChart projectId={projectId} />
+          <DeviceTypeChart projectId={project.id} />
         </div>
         
         {/* Add more charts/stats as desired */}
