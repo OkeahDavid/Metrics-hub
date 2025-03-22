@@ -1,12 +1,46 @@
 // app/dashboard/page.tsx
 import prisma from '@/lib/db';
 import Link from 'next/link';
+import { formatDistanceToNow } from 'date-fns';
+import { JSX } from 'react';
 
-export default async function DashboardPage() {
-  // Get all projects
-  const projects = await prisma.project.findMany({
-    orderBy: { createdAt: 'desc' },
-  });
+interface Project {
+  id: string;
+  name: string;
+  apiKey: string;
+  createdAt: Date;
+}
+
+export default async function DashboardPage(): Promise<JSX.Element> {
+  let projects: Project[] = [];
+  let totalStats: { _count: { id: number } } = { _count: { id: 0 } };
+  let last24HoursStats = 0;
+
+  try {
+    // Get all projects
+    projects = await prisma.project.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
+
+    // Get total stats
+    totalStats = await prisma.pageView.aggregate({
+      _count: { id: true },
+    });
+
+    // Get last 24 hours stats
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    last24HoursStats = await prisma.pageView.count({
+      where: {
+        createdAt: {
+          gte: yesterday,
+        },
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching data:', error);
+  }
 
   return (
     <div>
@@ -26,6 +60,21 @@ export default async function DashboardPage() {
         </div>
       </div>
 
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <div className="bg-white shadow rounded-lg p-4">
+          <h3 className="text-lg font-medium text-gray-900">Total Projects</h3>
+          <p className="mt-1 text-3xl font-semibold text-indigo-600">{projects.length}</p>
+        </div>
+        <div className="bg-white shadow rounded-lg p-4">
+          <h3 className="text-lg font-medium text-gray-900">Total Page Views</h3>
+          <p className="mt-1 text-3xl font-semibold text-indigo-600">{totalStats._count.id || 0}</p>
+        </div>
+        <div className="bg-white shadow rounded-lg p-4">
+          <h3 className="text-lg font-medium text-gray-900">Last 24 Hours</h3>
+          <p className="mt-1 text-3xl font-semibold text-indigo-600">{last24HoursStats}</p>
+        </div>
+      </div>
+
       <div className="bg-white shadow overflow-hidden sm:rounded-md">
         <ul className="divide-y divide-gray-200">
           {projects.length === 0 ? (
@@ -41,16 +90,21 @@ export default async function DashboardPage() {
                       <p className="text-sm font-medium text-indigo-600 truncate">
                         {project.name}
                       </p>
+                      <div className="flex-shrink-0">
+                        <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
+                          Active
+                        </span>
+                      </div>
                     </div>
                     <div className="mt-2 sm:flex sm:justify-between">
                       <div className="sm:flex">
                         <p className="flex items-center text-sm text-gray-500">
-                          API Key: {project.apiKey.substring(0, 8)}...
+                          API Key: <code className="ml-1 font-mono bg-gray-100 px-1 py-0.5 rounded">{project.apiKey.substring(0, 8)}...</code>
                         </p>
                       </div>
                       <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
                         <p>
-                          Created on {new Date(project.createdAt).toLocaleDateString()}
+                          Created {formatDistanceToNow(new Date(project.createdAt))} ago
                         </p>
                       </div>
                     </div>

@@ -1,3 +1,4 @@
+// components/analytics/PageViewsChart.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -42,6 +43,7 @@ export default function PageViewsChart({ projectId, days = 7 }: PageViewsChartPr
   const [isLoading, setIsLoading] = useState(true);
   const [chartType, setChartType] = useState<'line' | 'bar'>('line');
   const [error, setError] = useState('');
+  const [totalViews, setTotalViews] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -55,6 +57,10 @@ export default function PageViewsChart({ projectId, days = 7 }: PageViewsChartPr
         
         const data = await response.json();
         setPageViewsData(data.dailyPageViews);
+        
+        // Calculate total views for the period
+        const total = data.dailyPageViews.reduce((sum: number, item: PageViewsData) => sum + item.count, 0);
+        setTotalViews(total);
       } catch (err) {
         setError('Failed to load chart data');
         console.error(err);
@@ -117,7 +123,15 @@ export default function PageViewsChart({ projectId, days = 7 }: PageViewsChartPr
   };
 
   if (isLoading) {
-    return <div className="h-64 flex items-center justify-center bg-gray-50">Loading chart data...</div>;
+    return (
+      <div className="bg-white p-4 rounded-lg shadow">
+        <div className="flex justify-between items-center mb-4">
+          <div className="h-6 bg-gray-200 rounded animate-pulse w-40"></div>
+          <div className="inline-flex rounded-md shadow-sm bg-gray-200 h-8 w-32 animate-pulse"></div>
+        </div>
+        <div className="h-64 bg-gray-200 rounded animate-pulse"></div>
+      </div>
+    );
   }
 
   if (error) {
@@ -126,7 +140,10 @@ export default function PageViewsChart({ projectId, days = 7 }: PageViewsChartPr
 
   return (
     <div className="bg-white p-4 rounded-lg shadow">
-      <div className="flex justify-end mb-4">
+      <div className="flex justify-between items-center mb-4">
+        <div className="text-lg font-medium">
+          Total: <span className="text-indigo-600">{totalViews} views</span>
+        </div>
         <div className="inline-flex rounded-md shadow-sm">
           <button
             type="button"
