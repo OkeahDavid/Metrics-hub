@@ -3,6 +3,10 @@ import prisma from '@/lib/db';
 
 export async function POST(request: Request) {
   try {
+    // Handle CORS
+    const origin = request.headers.get('origin');
+    
+    // Create the response first
     const data = await request.json();
     const { page, referrer, projectApiKey, sessionId, userAgent } = data;
 
@@ -12,7 +16,18 @@ export async function POST(request: Request) {
     });
 
     if (!project) {
-      return NextResponse.json({ error: 'Invalid API key' }, { status: 401 });
+      return new NextResponse(
+        JSON.stringify({ error: 'Invalid API key' }),
+        { 
+          status: 401,
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': origin || '*',
+            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+          }
+        }
+      );
     }
 
     // Store the page view
@@ -30,9 +45,46 @@ export async function POST(request: Request) {
       }
     });
 
-    return NextResponse.json({ success: true });
+    return new NextResponse(
+      JSON.stringify({ success: true }),
+      { 
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': origin || '*',
+          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+        }
+      }
+    );
   } catch (error) {
     console.error('Error tracking analytics:', error);
-    return NextResponse.json({ error: 'Failed to track analytics' }, { status: 500 });
+    return new NextResponse(
+      JSON.stringify({ error: 'Failed to track analytics' }),
+      { 
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+        }
+      }
+    );
   }
+}
+
+// Add this to handle preflight OPTIONS requests
+export async function OPTIONS(request: Request) {
+  const origin = request.headers.get('origin');
+  
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': origin || '*',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Max-Age': '86400' // 24 hours
+    }
+  });
 }
