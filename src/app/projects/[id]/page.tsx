@@ -1,4 +1,3 @@
-// app/projects/[id]/page.tsx
 "use client";
 
 import { useEffect, useState, useCallback } from 'react';
@@ -21,6 +20,7 @@ export default function ProjectPage() {
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState(7);
   const [error, setError] = useState('');
+  const [showInstallation, setShowInstallation] = useState(false);
 
   const fetchProject = useCallback(async () => {
     try {
@@ -71,6 +71,12 @@ export default function ProjectPage() {
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">{project.name} - Analytics</h2>
         <div className="flex space-x-3">
+          <button
+            onClick={() => setShowInstallation(!showInstallation)}
+            className="px-3 py-2 text-black text-sm bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50"
+          >
+            {showInstallation ? 'Hide Setup' : 'Setup Instructions'}
+          </button>
           <ExportDataButton projectId={project.id} projectName={project.name} />
           <div className="inline-flex rounded-md shadow-sm">
             {[7, 14, 30, 90].map((days) => (
@@ -90,26 +96,31 @@ export default function ProjectPage() {
         </div>
       </div>
       
-      <div className="mb-6 bg-gray-50 p-4 rounded-md">
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="text-lg text-black font-semibold">API Key</h3>
-          <CopyToClipboard text={project.apiKey} onCopy={handleCopySuccess}>
-            <button className="px-3 py-1 text-sm text-indigo-600 hover:bg-indigo-50 rounded-md">
-              Copy to Clipboard
-            </button>
-          </CopyToClipboard>
-        </div>
-        <code className="block bg-gray-800 text-white p-3 rounded-md overflow-x-auto font-mono">
-          {project.apiKey}
-        </code>
-      </div>
-      
-      <div className="mb-6">
-        <h3 className="text-lg font-semibold mb-2">Installation</h3>
-        <div className="bg-gray-50 p-4 rounded-md">
-          <p className="text-sm text-gray-700 mb-2">Add this script to your website:</p>
-          <pre className="bg-gray-800 text-white p-3 rounded-md overflow-x-auto text-xs">
-            {`<script>
+      {/* Installation section - now collapsible */}
+      {showInstallation && (
+        <div className="mb-6 bg-white border border-gray-200 rounded-lg shadow-sm">
+          <div className="p-4 border-b border-gray-200">
+            <h3 className="text-lg text-black font-medium">Installation Instructions</h3>
+          </div>
+          <div className="p-4">
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="text-sm font-medium text-gray-700">Step 1: Copy your API Key</h4>
+                <CopyToClipboard text={project.apiKey} onCopy={handleCopySuccess}>
+                  <button className="px-3 py-1 text-xs text-indigo-600 hover:bg-indigo-50 rounded-md">
+                    Copy Key
+                  </button>
+                </CopyToClipboard>
+              </div>
+              <code className="block bg-gray-800 text-white p-2 rounded-md overflow-x-auto text-sm font-mono">
+                {project.apiKey}
+              </code>
+            </div>
+            
+            <div>
+              <h4 className="text-sm font-medium text-gray-700 mb-2">Step 2: Add this script to your website</h4>
+              <pre className="bg-gray-800 text-white p-3 rounded-md overflow-x-auto text-xs">
+                {`<script>
   (function() {
     // Generate a session ID
     let sessionId = localStorage.getItem('metrics_session_id');
@@ -133,9 +144,9 @@ export default function ProjectPage() {
     }).catch(err => console.error('Analytics error:', err));
   })();
 </script>`}
-          </pre>
-          <CopyToClipboard 
-            text={`<script>
+              </pre>
+              <CopyToClipboard 
+                text={`<script>
   (function() {
     // Generate a session ID
     let sessionId = localStorage.getItem('metrics_session_id');
@@ -159,15 +170,18 @@ export default function ProjectPage() {
     }).catch(err => console.error('Analytics error:', err));
   })();
 </script>`} 
-            onCopy={() => toast.success('Tracking script copied to clipboard!')}
-          >
-            <button className="mt-2 px-3 py-1 text-sm text-indigo-600 hover:bg-indigo-50 rounded-md">
-              Copy Script
-            </button>
-          </CopyToClipboard>
+                onCopy={() => toast.success('Tracking script copied to clipboard!')}
+              >
+                <button className="mt-2 px-3 py-1 text-sm text-indigo-600 hover:bg-indigo-50 rounded-md">
+                  Copy Script
+                </button>
+              </CopyToClipboard>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
       
+      {/* Main analytics dashboard */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <PageViewsChart projectId={project.id} days={timeRange} />

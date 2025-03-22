@@ -1,4 +1,3 @@
-// app/api/projects/[id]/top-pages/route.ts
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { subDays } from 'date-fns';
@@ -8,7 +7,8 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = params;
+    // Properly await the params before accessing
+    const { id } = await params;
     
     // Get project to verify it exists
     const project = await prisma.project.findUnique({
