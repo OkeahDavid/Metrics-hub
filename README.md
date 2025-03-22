@@ -1,36 +1,101 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Metrics Hub
+
+A lightweight, privacy-focused analytics platform for tracking website statistics across multiple projects.
+
+## Features
+
+- **Anonymous Data Collection**: Track visitor metrics without collecting personally identifiable information
+- **Multi-Project Support**: Monitor statistics across different websites/applications
+- **Custom Dashboard**: Visualize traffic patterns with interactive charts
+- **API Integration**: Easy-to-implement tracking script for any website
+- **Privacy Compliant**: Designed with GDPR and privacy regulations in mind
+
+## Tech Stack
+
+- **Frontend & Backend**: Next.js 14 (App Router)
+- **Database**: PostgreSQL
+- **ORM**: Prisma
+- **Authentication**: NextAuth.js
+- **Visualization**: Chart.js with react-chartjs-2
+- **Styling**: Tailwind CSS
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Node.js 18+ and npm
+- PostgreSQL database
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/OkeahDavid/Metrics-hub.git
+   cd metrics-hub
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Set up environment variables:
+   Create a `.env` file in the root directory with:
+   ```
+   DATABASE_URL="postgresql://username:password@localhost:5432/metrics_hub"
+   NEXTAUTH_SECRET="your-secret-key"
+   NEXTAUTH_URL="http://localhost:3000"
+   ```
+
+4. Initialize the database:
+   ```bash
+   npx prisma migrate dev --name init
+   ```
+
+5. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+6. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## Usage
+
+### Adding a Project
+
+1. Sign up/login to your dashboard
+2. Create a new project to receive a unique API key
+3. Integrate the tracking script into your website/application
+
+### Tracking Script
+
+Add the following script to your website:
+
+```html
+<script async src="https://your-metrics-hub.com/api/tracking-script?apiKey=YOUR_API_KEY"></script>
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Viewing Analytics
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Access your dashboard to view:
+- Page views over time
+- Traffic sources
+- Geographic distribution
+- Device types
+- Custom reports
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Contributing
 
-## Learn More
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-To learn more about Next.js, take a look at the following resources:
+## License
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Privacy
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Metrics Hub is designed to be privacy-focused by default:
+- No cookies required
+- IP addresses are anonymized
+- No personal data collection
+- Compliant with GDPR and similar regulations
