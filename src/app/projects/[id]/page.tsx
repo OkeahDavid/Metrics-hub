@@ -7,6 +7,7 @@ import DeviceTypeChart from '@/components/analytics/DeviceTypeChart';
 import ReferrerChart from '@/components/analytics/ReferrerChart';
 import TopPagesTable from '@/components/analytics/TopPagesTable';
 import LiveVisitors from '@/components/analytics/LiveVisitors';
+import TopCountriesChart from '@/components/analytics/TopCountriesChart';
 import CopyToClipboard from '@/components/ui/CopyToClipboard';
 import ExportDataButton from '@/components/analytics/ExportDataButton';
 import { ToastContainer, toast } from 'react-toastify';
@@ -129,19 +130,43 @@ export default function ProjectPage() {
       localStorage.setItem('metrics_session_id', sessionId);
     }
     
-    // Send pageview data
-    fetch('${process.env.NEXT_PUBLIC_BASE_URL || 'https://your-metrics-hub.com'}/api/track', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        projectApiKey: '${project.apiKey}',
-        page: window.location.pathname,
-        referrer: document.referrer,
-        sessionId: sessionId,
-        userAgent: navigator.userAgent,
-        deviceType: /Mobile|Android|iPhone/i.test(navigator.userAgent) ? 'mobile' : 'desktop'
+    // Get country information
+    fetch('https://ipapi.co/json/')
+      .then(response => response.json())
+      .then(data => {
+        // Send pageview data with location info
+        fetch('${process.env.NEXT_PUBLIC_BASE_URL || 'https://your-metrics-hub.com'}/api/track', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            projectApiKey: '${project.apiKey}',
+            page: window.location.pathname,
+            referrer: document.referrer,
+            sessionId: sessionId,
+            userAgent: navigator.userAgent,
+            deviceType: /Mobile|Android|iPhone/i.test(navigator.userAgent) ? 'mobile' : 'desktop',
+            country: data.country_name,
+            region: data.region,
+            city: data.city
+          })
+        }).catch(err => console.error('Analytics error:', err));
       })
-    }).catch(err => console.error('Analytics error:', err));
+      .catch(err => {
+        // Fall back to sending data without location info
+        console.error('Country detection error:', err);
+        fetch('${process.env.NEXT_PUBLIC_BASE_URL || 'https://your-metrics-hub.com'}/api/track', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            projectApiKey: '${project.apiKey}',
+            page: window.location.pathname,
+            referrer: document.referrer,
+            sessionId: sessionId,
+            userAgent: navigator.userAgent,
+            deviceType: /Mobile|Android|iPhone/i.test(navigator.userAgent) ? 'mobile' : 'desktop'
+          })
+        }).catch(err => console.error('Analytics error:', err));
+      });
   })();
 </script>`}
               </pre>
@@ -155,19 +180,43 @@ export default function ProjectPage() {
       localStorage.setItem('metrics_session_id', sessionId);
     }
     
-    // Send pageview data
-    fetch('${process.env.NEXT_PUBLIC_BASE_URL || 'https://your-metrics-hub.com'}/api/track', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        projectApiKey: '${project.apiKey}',
-        page: window.location.pathname,
-        referrer: document.referrer,
-        sessionId: sessionId,
-        userAgent: navigator.userAgent,
-        deviceType: /Mobile|Android|iPhone/i.test(navigator.userAgent) ? 'mobile' : 'desktop'
+    // Get country information
+    fetch('https://ipapi.co/json/')
+      .then(response => response.json())
+      .then(data => {
+        // Send pageview data with location info
+        fetch('${process.env.NEXT_PUBLIC_BASE_URL || 'https://your-metrics-hub.com'}/api/track', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            projectApiKey: '${project.apiKey}',
+            page: window.location.pathname,
+            referrer: document.referrer,
+            sessionId: sessionId,
+            userAgent: navigator.userAgent,
+            deviceType: /Mobile|Android|iPhone/i.test(navigator.userAgent) ? 'mobile' : 'desktop',
+            country: data.country_name,
+            region: data.region,
+            city: data.city
+          })
+        }).catch(err => console.error('Analytics error:', err));
       })
-    }).catch(err => console.error('Analytics error:', err));
+      .catch(err => {
+        // Fall back to sending data without location info
+        console.error('Country detection error:', err);
+        fetch('${process.env.NEXT_PUBLIC_BASE_URL || 'https://your-metrics-hub.com'}/api/track', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            projectApiKey: '${project.apiKey}',
+            page: window.location.pathname,
+            referrer: document.referrer,
+            sessionId: sessionId,
+            userAgent: navigator.userAgent,
+            deviceType: /Mobile|Android|iPhone/i.test(navigator.userAgent) ? 'mobile' : 'desktop'
+          })
+        }).catch(err => console.error('Analytics error:', err));
+      });
   })();
 </script>`} 
                 onCopy={() => toast.success('Tracking script copied to clipboard!')}
@@ -197,6 +246,10 @@ export default function ProjectPage() {
         
         <div>
           <ReferrerChart projectId={project.id} />
+        </div>
+        
+        <div>
+          <TopCountriesChart projectId={project.id} />
         </div>
         
         <div className="lg:col-span-3">
