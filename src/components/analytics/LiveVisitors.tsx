@@ -15,7 +15,8 @@ export default function LiveVisitors({ projectId }: LiveVisitorsProps) {
   useEffect(() => {
     const fetchLiveVisitors = async () => {
       try {
-        const response = await fetch(`/api/projects/${projectId}/live-visitors`);
+        // Add cache busting parameter
+        const response = await fetch(`/api/projects/${projectId}/live-visitors?t=${Date.now()}`);
         
         if (!response.ok) {
           throw new Error('Failed to fetch live visitors');
@@ -34,8 +35,8 @@ export default function LiveVisitors({ projectId }: LiveVisitorsProps) {
     // Initial fetch
     fetchLiveVisitors();
     
-    // Set up interval for periodic updates
-    const intervalId = setInterval(fetchLiveVisitors, 60000); // Update every minute
+    // Set up interval for periodic updates - increase frequency to 10 seconds for better testing
+    const intervalId = setInterval(fetchLiveVisitors, 10000); 
     
     // Clean up on unmount
     return () => clearInterval(intervalId);

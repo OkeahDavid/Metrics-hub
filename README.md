@@ -78,6 +78,18 @@ Add the following script to your website:
       localStorage.setItem('metrics_session_id', sessionId);
     }
     
+    // Better device detection
+    function getDeviceType() {
+      const ua = navigator.userAgent;
+      if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua)) {
+        return 'tablet';
+      }
+      if (/Mobile|Android|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua)) {
+        return 'mobile';
+      }
+      return 'desktop';
+    }
+    
     // Send pageview data
     fetch('https://your-metrics-hub.com/api/track', {
       method: 'POST',
@@ -88,8 +100,9 @@ Add the following script to your website:
         referrer: document.referrer,
         sessionId: sessionId,
         userAgent: navigator.userAgent,
-        deviceType: /Mobile|Android|iPhone/i.test(navigator.userAgent) ? 'mobile' : 'desktop'
-      })
+        deviceType: getDeviceType()
+      }),
+      keepalive: true // Important for preserving requests when page unloads
     }).catch(err => console.error('Analytics error:', err));
   })();
 </script>

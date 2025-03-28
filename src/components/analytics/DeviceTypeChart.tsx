@@ -9,12 +9,7 @@ import {
 } from 'chart.js';
 import { Pie } from 'react-chartjs-2';
 
-// Register ChartJS components
-ChartJS.register(
-  ArcElement,
-  Tooltip,
-  Legend
-);
+ChartJS.register(ArcElement, Tooltip, Legend);
 
 interface DeviceData {
   deviceType: string;
@@ -34,28 +29,41 @@ export default function DeviceTypeChart({ projectId }: DeviceTypeChartProps) {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch(`/api/projects/${projectId}/device-types`);
+        // Add cache busting parameter
+        const response = await fetch(`/api/projects/${projectId}/device-types?t=${Date.now()}`);
         
         if (!response.ok) {
           throw new Error('Failed to fetch device data');
         }
         
         const data = await response.json();
-        setDeviceData(data.deviceTypes);
+        console.log('Device data response:', data);
+        
+        if (data.deviceTypes && Array.isArray(data.deviceTypes)) {
+          setDeviceData(data.deviceTypes);
+        } else {
+          console.error('Invalid device data format:', data);
+          setError('Invalid data format received');
+        }
       } catch (err) {
+        console.error('Error fetching device data:', err);
         setError('Failed to load device data');
-        console.error(err);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchData();
+
+    // Refresh more frequently during testing
+    const intervalId = setInterval(fetchData, 15000); // Update every 15 seconds
+    
+    return () => clearInterval(intervalId);
   }, [projectId]);
 
   // Default data if no visits yet
   const getChartData = () => {
-    if (deviceData.length === 0) {
+    if (!deviceData || deviceData.length === 0) {
       return {
         labels: ['No Data'],
         datasets: [
@@ -68,16 +76,34 @@ export default function DeviceTypeChart({ projectId }: DeviceTypeChartProps) {
       };
     }
 
+    // Create a map of device types for more reliable data
+    const deviceMap = {
+      desktop: 0,
+      mobile: 0,
+      tablet: 0
+    };
+    
+    // Fill the map with actual data
+    deviceData.forEach(item => {
+      if (item.deviceType && ['desktop', 'mobile', 'tablet'].includes(item.deviceType)) {
+        if (item.deviceType in deviceMap) {
+          deviceMap[item.deviceType as keyof typeof deviceMap] = item.count;
+        }
+      }
+    });
+    
+    console.log('Processed device map:', deviceMap);
+    
+    // Create chart data from the map
     return {
-      labels: deviceData.map(item => item.deviceType || 'Unknown'),
+      labels: Object.keys(deviceMap),
       datasets: [
         {
-          data: deviceData.map(item => item.count),
+          data: Object.values(deviceMap),
           backgroundColor: [
-            'rgba(99, 102, 241, 0.7)',  // Indigo
-            'rgba(79, 70, 229, 0.7)',   // Purple
-            'rgba(16, 185, 129, 0.7)',  // Green
-            'rgba(245, 158, 11, 0.7)',  // Amber
+            'rgba(99, 102, 241, 0.7)',  // Indigo (desktop)
+            'rgba(16, 185, 129, 0.7)',  // Green (mobile)
+            'rgba(245, 158, 11, 0.7)',  // Amber (tablet)
           ],
           borderWidth: 1,
           borderColor: '#ffffff',
@@ -111,6 +137,11 @@ export default function DeviceTypeChart({ projectId }: DeviceTypeChartProps) {
     <div className="bg-white p-4 rounded-lg shadow h-full">
       <div className="h-64 flex items-center justify-center">
         <Pie data={getChartData()} options={options} />
+      </div>
+      <div className="mt-2 text-xs text-gray-500 text-center">
+        {deviceData.map(item => (
+          <div key={item.deviceType}>{item.deviceType}: {item.count}</div>
+        ))}
       </div>
     </div>
   );

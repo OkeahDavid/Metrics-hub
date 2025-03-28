@@ -34,9 +34,22 @@ export async function GET(
       select: {
         sessionId: true,
       },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
 
-    return NextResponse.json({ count: uniqueSessions.length });
+    // Add a cache control header to prevent browser caching
+    return new NextResponse(
+      JSON.stringify({ count: uniqueSessions.length }),
+      {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-store, max-age=0'
+        }
+      }
+    );
   } catch (error) {
     console.error('Error fetching live visitors:', error);
     return NextResponse.json(

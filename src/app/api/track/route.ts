@@ -8,7 +8,9 @@ export async function POST(request: Request) {
     
     // Create the response first
     const data = await request.json();
-    const { page, referrer, projectApiKey, sessionId, userAgent } = data;
+    console.log("Received tracking data:", data); // Debug log
+    
+    const { page, referrer, projectApiKey, sessionId, userAgent, deviceType } = data;
 
     // Validate API key
     const project = await prisma.project.findUnique({
@@ -16,6 +18,7 @@ export async function POST(request: Request) {
     });
 
     if (!project) {
+      console.log("Invalid API key:", projectApiKey);
       return new NextResponse(
         JSON.stringify({ error: 'Invalid API key' }),
         { 
@@ -30,8 +33,25 @@ export async function POST(request: Request) {
       );
     }
 
+    // Normalize device type
+    let normalizedDeviceType = deviceType;
+    if (!normalizedDeviceType || !['mobile', 'tablet', 'desktop'].includes(normalizedDeviceType)) {
+      // Fallback detection if client-side detection failed
+      if (userAgent && /Mobile|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)) {
+        if (/(tablet|ipad|playbook|silk)|(android(?!.*mobile))/i.test(userAgent)) {
+          normalizedDeviceType = 'tablet';
+        } else {
+          normalizedDeviceType = 'mobile';
+        }
+      } else {
+        normalizedDeviceType = 'desktop';
+      }
+    }
+    
+    console.log(`Storing pageview with device type: ${normalizedDeviceType} for project ${project.id}`);
+
     // Store the page view
-    await prisma.pageView.create({
+    const pageView = await prisma.pageView.create({
       data: {
         page,
         referrer: referrer || null,
@@ -39,14 +59,16 @@ export async function POST(request: Request) {
         country: data.country || null,
         region: data.region || null,
         city: data.city || null,
-        deviceType: data.deviceType || null,
+        deviceType: normalizedDeviceType,
         sessionId,
         projectId: project.id
       }
     });
+    
+    console.log("Created pageView:", pageView.id);
 
     return new NextResponse(
-      JSON.stringify({ success: true }),
+      JSON.stringify({ success: true, pageViewId: pageView.id }),
       { 
         status: 200,
         headers: {
@@ -74,7 +96,7 @@ export async function POST(request: Request) {
   }
 }
 
-// Add this to handle preflight OPTIONS requests
+// Handle preflight OPTIONS requests
 export async function OPTIONS(request: Request) {
   const origin = request.headers.get('origin');
   
