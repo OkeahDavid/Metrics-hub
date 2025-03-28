@@ -64,49 +64,6 @@ A lightweight, privacy-focused analytics platform for tracking website statistic
 2. Create a new project to receive a unique API key
 3. Integrate the tracking script into your website/application
 
-### Tracking Script
-
-Add the following script to your website:
-
-```html
-<script>
-  (function() {
-    // Generate a session ID
-    let sessionId = localStorage.getItem('metrics_session_id');
-    if (!sessionId) {
-      sessionId = Math.random().toString(36).substring(2, 15);
-      localStorage.setItem('metrics_session_id', sessionId);
-    }
-    
-    // Better device detection
-    function getDeviceType() {
-      const ua = navigator.userAgent;
-      if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua)) {
-        return 'tablet';
-      }
-      if (/Mobile|Android|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua)) {
-        return 'mobile';
-      }
-      return 'desktop';
-    }
-    
-    // Send pageview data
-    fetch('https://your-metrics-hub.com/api/track', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        projectApiKey: 'YOUR_API_KEY',
-        page: window.location.pathname,
-        referrer: document.referrer,
-        sessionId: sessionId,
-        userAgent: navigator.userAgent,
-        deviceType: getDeviceType()
-      }),
-      keepalive: true // Important for preserving requests when page unloads
-    }).catch(err => console.error('Analytics error:', err));
-  })();
-</script>
-```
 
 ### Viewing Analytics
 
