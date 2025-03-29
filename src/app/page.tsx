@@ -1,6 +1,11 @@
 import Link from 'next/link';
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "./api/auth/[...nextauth]/route";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const session = await getServerSession(authOptions);
+  const isAuthenticated = !!session;
+
   return (
     <div className="bg-white">
       <header className="relative">
@@ -12,9 +17,25 @@ export default function HomePage() {
               </div>
             </div>
             <div className="flex space-x-4">
-              <Link href="/dashboard" className="text-base font-medium text-white hover:text-gray-300">
-                Dashboard
-              </Link>
+              {isAuthenticated ? (
+                <>
+                  <Link href="/dashboard" className="text-base font-medium text-white hover:text-gray-300">
+                    Dashboard
+                  </Link>
+                  <Link href="/profile" className="text-base font-medium text-white hover:text-gray-300">
+                    Profile
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link href="/auth/signin" className="text-base font-medium text-white hover:text-gray-300">
+                    Sign In
+                  </Link>
+                  <Link href="/auth/register" className="text-base font-medium text-white hover:text-gray-300">
+                    Register
+                  </Link>
+                </>
+              )}
             </div>
           </nav>
         </div>
@@ -32,16 +53,33 @@ export default function HomePage() {
                   privacy-focused analytics dashboard.
                 </p>
                 <div className="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
-                  <div className="rounded-md shadow">
-                    <Link href="/projects/new" className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 md:py-4 md:text-lg md:px-10">
-                      Create Project
-                    </Link>
-                  </div>
-                  <div className="mt-3 rounded-md shadow sm:mt-0 sm:ml-3">
-                    <Link href="/dashboard" className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-indigo-600 bg-white hover:bg-gray-50 md:py-4 md:text-lg md:px-10">
-                      View Dashboard
-                    </Link>
-                  </div>
+                  {isAuthenticated ? (
+                    <>
+                      <div className="rounded-md shadow">
+                        <Link href="/projects/new" className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 md:py-4 md:text-lg md:px-10">
+                          Create Project
+                        </Link>
+                      </div>
+                      <div className="mt-3 rounded-md shadow sm:mt-0 sm:ml-3">
+                        <Link href="/dashboard" className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-indigo-600 bg-white hover:bg-gray-50 md:py-4 md:text-lg md:px-10">
+                          View Dashboard
+                        </Link>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="rounded-md shadow">
+                        <Link href="/auth/register" className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 md:py-4 md:text-lg md:px-10">
+                          Get Started
+                        </Link>
+                      </div>
+                      <div className="mt-3 rounded-md shadow sm:mt-0 sm:ml-3">
+                        <Link href="/auth/signin" className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-indigo-600 bg-white hover:bg-gray-50 md:py-4 md:text-lg md:px-10">
+                          Sign In
+                        </Link>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
