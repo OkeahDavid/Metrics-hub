@@ -4,6 +4,7 @@
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { EyeIcon, EyeOffIcon } from "lucide-react";
 
 export default function SignInForm() {
   const router = useRouter();
@@ -11,6 +12,7 @@ export default function SignInForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,7 +49,7 @@ export default function SignInForm() {
       )}
       
       <div>
-        <label htmlFor="username" className="block text-sm font-medium leading-6 text-gray-900">
+        <label htmlFor="username" className="block text-sm font-medium leading-6 text-white-900">
           Username
         </label>
         <div className="mt-2">
@@ -64,21 +66,26 @@ export default function SignInForm() {
       </div>
 
       <div>
-        <div className="flex items-center justify-between">
-          <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900">
-            Password
-          </label>
-        </div>
-        <div className="mt-2">
+        <label htmlFor="password" className="block text-sm font-medium leading-6 text-white-900">
+          Password
+        </label>
+        <div className="mt-2 relative">
           <input
             id="password"
             name="password"
-            type="password"
+            type={showPassword ? "text" : "password"}
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+            className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 pr-10"
           />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-gray-700"
+          >
+            {showPassword ? <EyeOffIcon size={20} /> : <EyeIcon size={20} />}
+          </button>
         </div>
       </div>
 

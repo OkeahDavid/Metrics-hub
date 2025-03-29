@@ -9,11 +9,17 @@ interface User {
   isSuperUser: boolean;
 }
 
-export default function UserNav({ user }: { user: User }) {
+// Add a theme prop with default value 'light'
+export default function UserNav({ user, theme = 'light' }: { user: User; theme?: 'light' | 'dark' }) {
+  // Determine text color classes based on theme
+  const textColorClass = theme === 'dark' 
+    ? "text-white hover:text-gray-300" 
+    : "text-gray-900 hover:text-gray-700";
+
   return (
     <Menu as="div" className="relative ml-3">
       <div>
-        <Menu.Button className="flex items-center gap-x-1 text-sm font-semibold leading-6 text-gray-900">
+        <Menu.Button className={`flex items-center gap-x-1 text-base font-medium ${textColorClass}`}>
           {user.username}
           <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
             <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />

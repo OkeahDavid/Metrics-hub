@@ -1,10 +1,17 @@
 import Link from 'next/link';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "./api/auth/[...nextauth]/route";
+import UserNav from "@/components/auth/UserNav";
 
 export default async function HomePage() {
   const session = await getServerSession(authOptions);
   const isAuthenticated = !!session;
+  
+  // Get user data for UserNav if authenticated
+  const user = isAuthenticated ? {
+    username: session.user?.username || "User",
+    isSuperUser: session.user?.isSuperUser || false
+  } : null;
 
   return (
     <div className="bg-white">
@@ -16,7 +23,7 @@ export default async function HomePage() {
                 <h1 className="text-2xl font-bold text-white">Metrics Hub</h1>
               </div>
             </div>
-            <div className="flex space-x-4">
+            <div className="flex items-center space-x-4">
               {isAuthenticated ? (
                 <>
                   <Link href="/dashboard" className="text-base font-medium text-white hover:text-gray-300">
@@ -25,6 +32,7 @@ export default async function HomePage() {
                   <Link href="/profile" className="text-base font-medium text-white hover:text-gray-300">
                     Profile
                   </Link>
+                  {user && <UserNav user={user} theme="dark" />}
                 </>
               ) : (
                 <>
