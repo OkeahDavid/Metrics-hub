@@ -1,4 +1,3 @@
-// components/analytics/LiveVisitors.tsx
 'use client';
 
 import { useEffect, useState } from 'react';

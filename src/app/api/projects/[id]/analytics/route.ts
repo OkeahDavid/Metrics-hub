@@ -1,4 +1,3 @@
-// app/api/projects/[id]/analytics/route.ts
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { format, subDays, startOfDay, endOfDay } from 'date-fns';

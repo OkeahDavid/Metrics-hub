@@ -1,4 +1,3 @@
-// components/ui/CopyToClipboard.tsx
 "use client";
 
 import { ReactNode } from 'react';
