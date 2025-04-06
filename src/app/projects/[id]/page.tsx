@@ -147,7 +147,7 @@ export default function ProjectPage() {
                     .then(response => response.json())
                     .then(data => {
                       // Send pageview data with location info
-                      fetch('${process.env.NEXT_PUBLIC_BASE_URL || 'https://your-metrics-hub.com'}/api/track', {
+                      fetch('https://metrics-hub.netlify.app/api/track', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -167,7 +167,7 @@ export default function ProjectPage() {
                     .catch(err => {
                       // Fall back to sending data without location info
                       console.error('Country detection error:', err);
-                      fetch('${process.env.NEXT_PUBLIC_BASE_URL || 'https://your-metrics-hub.com'}/api/track', {
+                      fetch('https://metrics-hub.netlify.app/api/track', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -211,7 +211,7 @@ export default function ProjectPage() {
                     .then(response => response.json())
                     .then(data => {
                       // Send pageview data with location info
-                      fetch('${process.env.NEXT_PUBLIC_BASE_URL || 'https://your-metrics-hub.com'}/api/track', {
+                      fetch('https://metrics-hub.netlify.app/api/track', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -231,7 +231,7 @@ export default function ProjectPage() {
                     .catch(err => {
                       // Fall back to sending data without location info
                       console.error('Country detection error:', err);
-                      fetch('${process.env.NEXT_PUBLIC_BASE_URL || 'https://your-metrics-hub.com'}/api/track', {
+                      fetch('https://metrics-hub.netlify.app/api/track', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
