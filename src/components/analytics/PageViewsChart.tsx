@@ -1,4 +1,3 @@
-// components/analytics/PageViewsChart.tsx
 'use client';
 
 import { useEffect, useState } from 'react';

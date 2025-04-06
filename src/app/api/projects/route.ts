@@ -1,9 +1,20 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import crypto from 'crypto';
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "../auth/[...nextauth]/route";
 
 export async function POST(request: Request) {
   try {
+    const session = await getServerSession(authOptions);
+    
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     const data = await request.json();
     const { name } = data;
 
@@ -17,11 +28,12 @@ export async function POST(request: Request) {
     // Generate a random API key
     const apiKey = crypto.randomBytes(16).toString('hex');
 
-    // Create the project without user association
+    // Create the project with user association
     const project = await prisma.project.create({
       data: {
         name,
         apiKey,
+        userId: session.user.id, // Associate with current user
       },
     });
 
@@ -37,7 +49,20 @@ export async function POST(request: Request) {
 
 export async function GET() {
   try {
+    const session = await getServerSession(authOptions);
+    
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    // If superuser, return all projects, otherwise filter by user
     const projects = await prisma.project.findMany({
+      where: session.user.isSuperUser 
+        ? {} 
+        : { userId: session.user.id },
       orderBy: { createdAt: 'desc' },
     });
     

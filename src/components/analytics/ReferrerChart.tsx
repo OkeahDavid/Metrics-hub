@@ -1,4 +1,3 @@
-// components/analytics/ReferrerChart.tsx
 'use client';
 
 import { useEffect, useState } from 'react';

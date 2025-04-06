@@ -1,8 +1,11 @@
-// app/dashboard/page.tsx
 import prisma from '@/lib/db';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 import { JSX } from 'react';
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "../api/auth/[...nextauth]/route";
+import { redirect } from 'next/navigation';
+import UserNav from '@/components/auth/UserNav';
 
 interface Project {
   id: string;
@@ -12,32 +15,51 @@ interface Project {
 }
 
 export default async function DashboardPage(): Promise<JSX.Element> {
+  const session = await getServerSession(authOptions);
+  
+  if (!session) {
+    redirect('/auth/signin');
+  }
+
   let projects: Project[] = [];
   let totalStats: { _count: { id: number } } = { _count: { id: 0 } };
   let last24HoursStats = 0;
 
   try {
-    // Get all projects
+    // Get user-specific projects (or all if superuser)
     projects = await prisma.project.findMany({
+      where: session.user.isSuperUser
+        ? {}
+        : { userId: session.user.id as string }, // Ensure userId is cast to string
       orderBy: { createdAt: 'desc' },
     });
 
-    // Get total stats
-    totalStats = await prisma.pageView.aggregate({
-      _count: { id: true },
-    });
+    // Query conditions for page views based on project IDs
+    const projectIds = projects.map(project => project.id);
+    const pageViewCondition = projectIds.length > 0 
+      ? { projectId: { in: projectIds } } 
+      : undefined;
 
-    // Get last 24 hours stats
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
+    // Get total stats for user's projects only
+    if (pageViewCondition) {
+      totalStats = await prisma.pageView.aggregate({
+        _count: { id: true },
+        where: pageViewCondition
+      });
 
-    last24HoursStats = await prisma.pageView.count({
-      where: {
-        createdAt: {
-          gte: yesterday,
+      // Get last 24 hours stats for user's projects
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+
+      last24HoursStats = await prisma.pageView.count({
+        where: {
+          ...pageViewCondition,
+          createdAt: {
+            gte: yesterday,
+          },
         },
-      },
-    });
+      });
+    }
   } catch (error) {
     console.error('Error fetching data:', error);
   }
@@ -49,11 +71,15 @@ export default async function DashboardPage(): Promise<JSX.Element> {
           <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
             Dashboard
           </h2>
+          {session.user.isSuperUser && (
+            <p className="text-sm text-indigo-600 mt-1">Superuser Mode - Viewing All Projects</p>
+          )}
         </div>
-        <div className="mt-4 flex md:mt-0 md:ml-4">
+        <div className="mt-4 flex md:mt-0 md:ml-4 gap-4 items-center">
+          <UserNav user={session.user} theme="light" />
           <Link
             href="/projects/new"
-            className="ml-3 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           >
             Create New Project
           </Link>
