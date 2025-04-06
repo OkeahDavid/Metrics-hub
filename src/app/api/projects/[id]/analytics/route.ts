@@ -1,16 +1,15 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { format, subDays, startOfDay, endOfDay } from 'date-fns';
 
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: { params: { id: string } }
 ) {
   try {
-    // Use params directly - don't await it
-    const { id } = params;
+    const { id } = context.params;
     
-    const { searchParams } = new URL(request.url);
+    const searchParams = request.nextUrl.searchParams;
     const daysParam = searchParams.get('days');
     const days = daysParam ? parseInt(daysParam, 10) : 7;
 
