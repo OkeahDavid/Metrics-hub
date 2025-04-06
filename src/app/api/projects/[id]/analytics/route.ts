@@ -7,9 +7,8 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    // Await params before destructuring
-    const resolvedParams = await params;
-    const { id } = resolvedParams;
+    // Use params directly - don't await it
+    const { id } = params;
     
     const { searchParams } = new URL(request.url);
     const daysParam = searchParams.get('days');
