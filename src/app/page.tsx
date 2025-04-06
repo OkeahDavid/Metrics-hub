@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "./api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import UserNav from "@/components/auth/UserNav";
 
 export default async function HomePage() {
