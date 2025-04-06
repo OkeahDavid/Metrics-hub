@@ -1,3 +1,4 @@
+// app/api/users/[id]/toggle-superuser/route.ts
 import { NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth/next";
@@ -17,8 +18,13 @@ export async function POST(
       );
     }
 
-    // For security, in a real app you'd want more checks here
-    // This is simplified for the demo - normally only admins could do this
+    // Only superusers can toggle other users' status
+    if (!session.user.isSuperUser) {
+      return NextResponse.json(
+        { error: "Only administrators can modify user permissions" },
+        { status: 403 }
+      );
+    }
     
     const userId = params.id;
     const user = await prisma.user.findUnique({
@@ -29,14 +35,6 @@ export async function POST(
       return NextResponse.json(
         { error: "User not found" },
         { status: 404 }
-      );
-    }
-
-    // Only allow users to toggle their own superuser status
-    if (session.user.id !== userId) {
-      return NextResponse.json(
-        { error: "You can only modify your own account" },
-        { status: 403 }
       );
     }
 

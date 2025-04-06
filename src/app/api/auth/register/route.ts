@@ -29,12 +29,17 @@ export async function POST(request: Request) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Check if this is the admin user
+    const isAdmin = 
+      username === process.env.ADMIN_USERNAME && 
+      await bcrypt.compare(password, await bcrypt.hash(process.env.ADMIN_PASSWORD || '', 10));
+
     // Create user
     const user = await prisma.user.create({
       data: {
         username,
         password: hashedPassword,
-        isSuperUser: false, // Default to regular user
+        isSuperUser: isAdmin, // Set superuser based on admin credentials
       },
     });
 
