@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     // Check if this is the admin user
     const isAdmin = 
       username === process.env.ADMIN_USERNAME && 
-      await bcrypt.compare(password, await bcrypt.hash(process.env.ADMIN_PASSWORD || '', 10));
+      password === process.env.ADMIN_PASSWORD;
 
     // Create user
     const user = await prisma.user.create({
