@@ -2,12 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { format, subDays, startOfDay, endOfDay } from 'date-fns';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+type Props = {
+  params: {
+    id: string
+  }
+}
+
+export async function GET(request: NextRequest, props: Props) {
   try {
-    const { id } = params;
+    const { id } = props.params;
 
     const searchParams = request.nextUrl.searchParams;
     const daysParam = searchParams.get('days');
