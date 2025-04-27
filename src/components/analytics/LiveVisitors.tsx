@@ -1,47 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useProjectAnalytics } from '@/lib/hooks/useProjectAnalytics';
 
 interface LiveVisitorsProps {
   projectId: string;
 }
 
 export default function LiveVisitors({ projectId }: LiveVisitorsProps) {
-  const [liveCount, setLiveCount] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    const fetchLiveVisitors = async () => {
-      try {
-        // Add cache busting parameter
-        const response = await fetch(`/api/projects/${projectId}/live-visitors?t=${Date.now()}`);
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch live visitors');
-        }
-        
-        const data = await response.json();
-        setLiveCount(data.count);
-        setIsLoading(false);
-      } catch (err) {
-        setError('Failed to load live visitor data');
-        console.error(err);
-        setIsLoading(false);
-      }
-    };
-
-    // Initial fetch
-    fetchLiveVisitors();
-    
-    // Set up interval for periodic updates - increase frequency to 10 seconds for better testing
-    const intervalId = setInterval(fetchLiveVisitors, 10000); 
-    
-    // Clean up on unmount
-    return () => clearInterval(intervalId);
-  }, [projectId]);
-
-  if (isLoading) {
+  // Using our custom React Query hook instead of useState and useEffect
+  const { liveVisitors } = useProjectAnalytics(projectId);
+  
+  if (liveVisitors.isLoading) {
     return (
       <div className="bg-white p-4 rounded-lg shadow h-full flex items-center justify-center">
         <div className="h-6 bg-gray-200 rounded animate-pulse w-32"></div>
@@ -49,10 +18,10 @@ export default function LiveVisitors({ projectId }: LiveVisitorsProps) {
     );
   }
 
-  if (error) {
+  if (liveVisitors.error) {
     return (
       <div className="bg-white p-4 rounded-lg shadow h-full flex items-center justify-center text-red-500">
-        {error}
+        Failed to load live visitor data
       </div>
     );
   }
@@ -62,7 +31,7 @@ export default function LiveVisitors({ projectId }: LiveVisitorsProps) {
       <div className="flex flex-col items-center justify-center h-full">
         <h3 className="text-lg font-medium text-gray-900">Live Visitors</h3>
         <div className="mt-2 text-4xl font-bold text-indigo-600">
-          {liveCount}
+          {liveVisitors.data || 0}
         </div>
         <p className="mt-1 text-sm text-gray-500">currently on your site</p>
       </div>

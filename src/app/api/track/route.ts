@@ -1,16 +1,39 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/db';
+import { handleApiError } from '@/lib/error-handler';
+
+// Define a proper type for the tracking data
+interface TrackingData {
+  page: string;
+  referrer?: string;
+  projectApiKey: string;
+  sessionId: string;
+  userAgent?: string;
+  deviceType?: 'mobile' | 'tablet' | 'desktop';
+  country?: string;
+  region?: string;
+  city?: string;
+}
 
 export async function POST(request: Request) {
   try {
     // Handle CORS
     const origin = request.headers.get('origin');
     
-    // Create the response first
-    const data = await request.json();
-    console.log("Received tracking data:", data); // Debug log
+    // Parse and validate request data with proper typing
+    const data = await request.json() as TrackingData;
     
     const { page, referrer, projectApiKey, sessionId, userAgent, deviceType } = data;
+
+    if (!page || !projectApiKey || !sessionId) {
+      return NextResponse.json(
+        { error: 'Missing required fields' },
+        { 
+          status: 400,
+          headers: getCorsHeaders(origin)
+        }
+      );
+    }
 
     // Validate API key
     const project = await prisma.project.findUnique({
@@ -18,38 +41,18 @@ export async function POST(request: Request) {
     });
 
     if (!project) {
-      console.log("Invalid API key:", projectApiKey);
-      return new NextResponse(
-        JSON.stringify({ error: 'Invalid API key' }),
+      return NextResponse.json(
+        { error: 'Invalid API key' },
         { 
           status: 401,
-          headers: {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': origin || '*',
-            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-          }
+          headers: getCorsHeaders(origin)
         }
       );
     }
 
     // Normalize device type
-    let normalizedDeviceType = deviceType;
-    if (!normalizedDeviceType || !['mobile', 'tablet', 'desktop'].includes(normalizedDeviceType)) {
-      // Fallback detection if client-side detection failed
-      if (userAgent && /Mobile|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)) {
-        if (/(tablet|ipad|playbook|silk)|(android(?!.*mobile))/i.test(userAgent)) {
-          normalizedDeviceType = 'tablet';
-        } else {
-          normalizedDeviceType = 'mobile';
-        }
-      } else {
-        normalizedDeviceType = 'desktop';
-      }
-    }
+    const normalizedDeviceType = normalizeDeviceType(deviceType, userAgent);
     
-    console.log(`Storing pageview with device type: ${normalizedDeviceType} for project ${project.id}`);
-
     // Store the page view
     const pageView = await prisma.pageView.create({
       data: {
@@ -64,36 +67,58 @@ export async function POST(request: Request) {
         projectId: project.id
       }
     });
-    
-    console.log("Created pageView:", pageView.id);
 
-    return new NextResponse(
-      JSON.stringify({ success: true, pageViewId: pageView.id }),
+    return NextResponse.json(
+      { success: true, pageViewId: pageView.id },
       { 
         status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': origin || '*',
-          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-        }
+        headers: getCorsHeaders(origin)
       }
     );
   } catch (error) {
-    console.error('Error tracking analytics:', error);
-    return new NextResponse(
-      JSON.stringify({ error: 'Failed to track analytics' }),
-      { 
-        status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-        }
-      }
-    );
+    // Using our standardized error handler
+    const errorResponse = handleApiError(error, 'Failed to track analytics');
+    
+    // Add CORS headers to the error response
+    const origin = request.headers.get('origin');
+    const headers = errorResponse.headers;
+    const corsHeaders = getCorsHeaders(origin);
+    
+    Object.keys(corsHeaders).forEach(key => {
+      headers.append(key, corsHeaders[key]);
+    });
+    
+    return errorResponse;
   }
+}
+
+// Helper function to normalize device type
+function normalizeDeviceType(deviceType?: string, userAgent?: string): 'mobile' | 'tablet' | 'desktop' {
+  if (deviceType && ['mobile', 'tablet', 'desktop'].includes(deviceType)) {
+    return deviceType as 'mobile' | 'tablet' | 'desktop';
+  }
+  
+  // Fallback detection if client-side detection failed
+  if (userAgent) {
+    if (/Mobile|Android|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)) {
+      if (/(tablet|ipad|playbook|silk)|(android(?!.*mobile))/i.test(userAgent)) {
+        return 'tablet';
+      }
+      return 'mobile';
+    }
+  }
+  
+  return 'desktop';
+}
+
+// Helper function for CORS headers
+function getCorsHeaders(origin: string | null): Record<string, string> {
+  return {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': origin || '*',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+  };
 }
 
 // Handle preflight OPTIONS requests
@@ -102,11 +127,6 @@ export async function OPTIONS(request: Request) {
   
   return new NextResponse(null, {
     status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': origin || '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      'Access-Control-Max-Age': '86400' // 24 hours
-    }
+    headers: getCorsHeaders(origin)
   });
 }

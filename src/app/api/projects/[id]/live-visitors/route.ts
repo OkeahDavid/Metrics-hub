@@ -1,60 +1,42 @@
-import { NextResponse } from 'next/server';
-import prisma from '@/lib/db';
-import { subMinutes } from 'date-fns';
+import { handleApiError } from '@/lib/error-handler';
+import { createSuccessResponse } from '@/lib/api-response';
+import { ProjectService } from '@/lib/services/project-service';
+import { AnalyticsService } from '@/lib/services/analytics-service';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth';
 
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    // Properly await the params before accessing
-    const { id } = await params;
-    
-    // Get project to verify it exists
-    const project = await prisma.project.findUnique({
-      where: { id },
-    });
-
-    if (!project) {
-      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+    // Get the user session for authorization
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return handleApiError(new Error('Unauthorized'), 'Authentication required');
     }
 
-    // Consider a session "live" if it had activity in the last 5 minutes
-    const fiveMinutesAgo = subMinutes(new Date(), 5);
+    const { id } = params;
     
-    // Get unique sessions with activity in the last 5 minutes
-    const uniqueSessions = await prisma.pageView.findMany({
-      where: {
-        projectId: id,
-        createdAt: {
-          gte: fiveMinutesAgo,
-        },
-      },
-      distinct: ['sessionId'],
-      select: {
-        sessionId: true,
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+    // Use the ProjectService to verify user has access to this project
+    const project = await ProjectService.getProjectById(id, session.user.id, session.user.isSuperUser);
 
-    // Add a cache control header to prevent browser caching
-    return new NextResponse(
-      JSON.stringify({ count: uniqueSessions.length }),
+    if (!project) {
+      return handleApiError(new Error('Project not found or access denied'), 'Project not found');
+    }
+
+    // Use the AnalyticsService to fetch live visitor count
+    const visitorCount = await AnalyticsService.getLiveVisitorsCount(id);
+    
+    // Use standardized success response with Cache-Control headers
+    return createSuccessResponse(
+      { count: visitorCount },
+      'Live visitor count retrieved successfully',
       {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-store, max-age=0'
-        }
+        'Cache-Control': 'no-store, max-age=0'
       }
     );
   } catch (error) {
-    console.error('Error fetching live visitors:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch live visitors data' },
-      { status: 500 }
-    );
+    return handleApiError(error, 'Failed to fetch live visitors data');
   }
 }
