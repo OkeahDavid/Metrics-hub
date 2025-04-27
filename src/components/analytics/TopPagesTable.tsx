@@ -28,7 +28,9 @@ export default function TopPagesTable({ projectId }: TopPagesTableProps) {
         }
         
         const data = await response.json();
-        setPages(data.pages);
+        // Handle both the new standardized format and the old format
+        const pagesData = data.success ? data.data : data.pages;
+        setPages(pagesData);
       } catch (err) {
         setError('Failed to load page data');
         console.error(err);
@@ -85,8 +87,8 @@ export default function TopPagesTable({ projectId }: TopPagesTableProps) {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {pages.map((page) => (
-                <tr key={page.path}>
+              {pages.map((page, index) => (
+                <tr key={`${page.path}-${index}`}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {page.path}
                   </td>

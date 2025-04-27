@@ -41,7 +41,9 @@ export default function TopCountriesChart({ projectId }: TopCountriesChartProps)
         }
         
         const data = await response.json();
-        setCountryData(data.countries);
+        // Handle both the new standardized format and the old format
+        const countries = data.success ? data.data : data.countries;
+        setCountryData(countries);
       } catch (err) {
         setError('Failed to load country data');
         console.error(err);
@@ -68,18 +70,36 @@ export default function TopCountriesChart({ projectId }: TopCountriesChartProps)
       };
     }
 
+    // Extended color palette with distinct colors for better visual separation
+    const colorPalette = [
+      'rgba(99, 102, 241, 0.8)',    // Indigo
+      'rgba(16, 185, 129, 0.8)',    // Green
+      'rgba(245, 158, 11, 0.8)',    // Amber
+      'rgba(239, 68, 68, 0.8)',     // Red
+      'rgba(14, 165, 233, 0.8)',    // Sky blue
+      'rgba(168, 85, 247, 0.8)',    // Purple
+      'rgba(236, 72, 153, 0.8)',    // Pink
+      'rgba(234, 88, 12, 0.8)',     // Orange
+      'rgba(22, 163, 74, 0.8)',     // Green
+      'rgba(79, 70, 229, 0.8)',     // Violet
+      'rgba(190, 24, 93, 0.8)',     // Rose
+      'rgba(132, 204, 22, 0.8)',    // Lime
+      'rgba(6, 182, 212, 0.8)',     // Cyan
+      'rgba(249, 115, 22, 0.8)',    // Orange
+      'rgba(202, 138, 4, 0.8)'      // Amber dark
+    ];
+
+    // Ensure we have enough colors by cycling through the palette if needed
+    const backgroundColors = countryData.map((_, index) => 
+      colorPalette[index % colorPalette.length]
+    );
+
     return {
       labels: countryData.map(item => item.country),
       datasets: [
         {
           data: countryData.map(item => item.count),
-          backgroundColor: [
-            'rgba(99, 102, 241, 0.7)',  // Indigo
-            'rgba(79, 70, 229, 0.7)',   // Purple 
-            'rgba(16, 185, 129, 0.7)',  // Green
-            'rgba(245, 158, 11, 0.7)',  // Amber
-            'rgba(239, 68, 68, 0.7)',   // Red
-          ],
+          backgroundColor: backgroundColors,
           borderWidth: 1,
           borderColor: '#ffffff',
         },

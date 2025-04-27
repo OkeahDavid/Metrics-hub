@@ -33,7 +33,8 @@ export default function ProjectPage() {
       }
       
       const data = await response.json();
-      setProject(data.project);
+      // Update to work with the new standardized API response format
+      setProject(data.success ? data.data : data.project);
     } catch (err) {
       setError('Failed to load project');
       console.error(err);

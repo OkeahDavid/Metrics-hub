@@ -1,74 +1,123 @@
-import { NextResponse } from 'next/server';
-import prisma from '@/lib/db';
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
+import { handleApiError } from "@/lib/error-handler";
+import { createSuccessResponse, createNoContentResponse } from "@/lib/api-response";
+import { ProjectService } from "@/lib/services/project-service";
+
+interface ProjectDetailContext {
+  params: { 
+    id: string 
+  }
+}
 
 export async function GET(
   request: Request,
-  context: { params: { id: string } }
+  context: ProjectDetailContext
 ) {
   try {
-    // Properly await the params before accessing
-    const { id } = await context.params;
+    const session = await getServerSession(authOptions);
     
-    const project = await prisma.project.findUnique({
-      where: { id },
-    });
+    if (!session) {
+      return handleApiError(new Error('Unauthorized'), 'Authentication required');
+    }
+
+    const { id } = context.params;
+    
+    // Use ProjectService to verify user has access to this project
+    const project = await ProjectService.getProjectById(
+      id, 
+      session.user.id, 
+      session.user.isSuperUser
+    );
     
     if (!project) {
-      return NextResponse.json(
-        { error: 'Project not found' },
-        { status: 404 }
+      return handleApiError(
+        new Error('Project not found or access denied'), 
+        'Project not found', 
       );
     }
     
-    return NextResponse.json({ project });
+    return createSuccessResponse(project, 'Project details retrieved successfully');
   } catch (error) {
-    console.error('Error fetching project:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch project' },
-      { status: 500 }
-    );
+    return handleApiError(error, 'Failed to fetch project details');
   }
 }
 
 export async function DELETE(
   request: Request,
-  context: { params: { id: string } }
+  context: ProjectDetailContext
 ) {
   try {
-    const { id } = await context.params;
+    const session = await getServerSession(authOptions);
     
-    // Check if project exists before attempting to delete
-    const project = await prisma.project.findUnique({
-      where: { id },
-    });
+    if (!session) {
+      return handleApiError(new Error('Unauthorized'), 'Authentication required');
+    }
+
+    const { id } = context.params;
     
-    if (!project) {
-      return NextResponse.json(
-        { error: 'Project not found' },
-        { status: 404 }
+    // Use ProjectService to delete project
+    try {
+      await ProjectService.deleteProject(id, session.user.id, session.user.isSuperUser);
+      
+      // Use standardized no-content response for successful deletion
+      return createNoContentResponse();
+    } catch (error) {
+      if ((error as Error).message === 'Project not found or you do not have access') {
+        return handleApiError(error, 'Project not found or you do not have permission to delete it');
+      }
+      throw error; // Re-throw for the outer catch block to handle
+    }
+  } catch (error) {
+    return handleApiError(error, 'Failed to delete project');
+  }
+}
+
+export async function PATCH(
+  request: Request,
+  context: ProjectDetailContext
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    
+    if (!session) {
+      return handleApiError(new Error('Unauthorized'), 'Authentication required');
+    }
+
+    const { id } = context.params;
+    const data = await request.json();
+    
+    // Validate the request data
+    if (!data || (data.name !== undefined && typeof data.name !== 'string')) {
+      return handleApiError(
+        new Error('Invalid update data'), 
+        'Project name must be a string',
       );
     }
-    
-    // Delete all analytics data related to this project first
-    // This assumes your analytics data has a projectId field
-    await prisma.pageView.deleteMany({
-      where: { projectId: id },
-    });
-    
-    // Then delete the project itself
-    await prisma.project.delete({
-      where: { id },
-    });
-    
-    return NextResponse.json(
-      { message: 'Project deleted successfully' },
-      { status: 200 }
-    );
+
+    // Use ProjectService to update project
+    try {
+      const updatedProject = await ProjectService.updateProject(
+        id, 
+        session.user.id, 
+        session.user.isSuperUser, 
+        { name: data.name }
+      );
+      
+      return createSuccessResponse(
+        updatedProject, 
+        'Project updated successfully'
+      );
+    } catch (error) {
+      if ((error as Error).message === 'Project not found or you do not have access') {
+        return handleApiError(
+          error, 
+          'Project not found or you do not have permission to update it',
+        );
+      }
+      throw error; // Re-throw for the outer catch block to handle
+    }
   } catch (error) {
-    console.error('Error deleting project:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete project' },
-      { status: 500 }
-    );
+    return handleApiError(error, 'Failed to update project');
   }
 }

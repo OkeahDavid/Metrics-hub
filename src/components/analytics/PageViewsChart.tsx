@@ -55,10 +55,12 @@ export default function PageViewsChart({ projectId, days = 7 }: PageViewsChartPr
         }
         
         const data = await response.json();
-        setPageViewsData(data.dailyPageViews);
+        // Handle both the new standardized format and the old format
+        const pageViews = data.success ? data.data : data.dailyPageViews;
+        setPageViewsData(pageViews);
         
         // Calculate total views for the period
-        const total = data.dailyPageViews.reduce((sum: number, item: PageViewsData) => sum + item.count, 0);
+        const total = pageViews.reduce((sum: number, item: PageViewsData) => sum + item.count, 0);
         setTotalViews(total);
       } catch (err) {
         setError('Failed to load chart data');

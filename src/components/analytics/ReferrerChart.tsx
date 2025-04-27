@@ -47,7 +47,9 @@ export default function ReferrerChart({ projectId }: ReferrerChartProps) {
         }
         
         const data = await response.json();
-        setReferrerData(data.referrers);
+        // Handle both the new standardized format and the old format
+        const referrers = data.success ? data.data : data.referrers;
+        setReferrerData(referrers);
       } catch (err) {
         setError('Failed to load referrer data');
         console.error(err);

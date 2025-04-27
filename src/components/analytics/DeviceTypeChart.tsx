@@ -39,8 +39,11 @@ export default function DeviceTypeChart({ projectId }: DeviceTypeChartProps) {
         const data = await response.json();
         console.log('Device data response:', data);
         
-        if (data.deviceTypes && Array.isArray(data.deviceTypes)) {
-          setDeviceData(data.deviceTypes);
+        // Handle both the new standardized format and the old format
+        const deviceTypes = data.success ? data.data : data.deviceTypes;
+        
+        if (deviceTypes && Array.isArray(deviceTypes)) {
+          setDeviceData(deviceTypes);
         } else {
           console.error('Invalid device data format:', data);
           setError('Invalid data format received');
