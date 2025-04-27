@@ -1,16 +1,38 @@
-import { NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import bcrypt from "bcrypt";
+import { handleApiError } from "@/lib/error-handler";
+import { createCreatedResponse } from "@/lib/api-response";
+
+// Define proper types for register request
+interface RegisterRequest {
+  username: string;
+  password: string;
+}
 
 export async function POST(request: Request) {
   try {
-    const { username, password } = await request.json();
+    const body = await request.json();
+    const { username, password } = body as RegisterRequest;
 
     // Validate inputs
     if (!username || !password) {
-      return NextResponse.json(
-        { error: "Username and password are required" },
-        { status: 400 }
+      return handleApiError(
+        new Error("Missing required fields"),
+        "Username and password are required"
+      );
+    }
+
+    if (username.length < 3) {
+      return handleApiError(
+        new Error("Username too short"),
+        "Username must be at least 3 characters long"
+      );
+    }
+
+    if (password.length < 8) {
+      return handleApiError(
+        new Error("Password too short"),
+        "Password must be at least 8 characters long"
       );
     }
 
@@ -20,9 +42,9 @@ export async function POST(request: Request) {
     });
 
     if (existingUser) {
-      return NextResponse.json(
-        { error: "Username already exists" },
-        { status: 409 }
+      return handleApiError(
+        new Error("Username already exists"),
+        "This username is already taken"
       );
     }
 
@@ -43,19 +65,16 @@ export async function POST(request: Request) {
       },
     });
 
-    return NextResponse.json(
+    // Use standardized created response
+    return createCreatedResponse(
       { 
         id: user.id, 
         username: user.username,
         createdAt: user.createdAt 
       },
-      { status: 201 }
+      "User registered successfully"
     );
   } catch (error) {
-    console.error("Error registering user:", error);
-    return NextResponse.json(
-      { error: "Failed to register user" },
-      { status: 500 }
-    );
+    return handleApiError(error, "Failed to register user");
   }
 }

@@ -55,7 +55,8 @@ export const authOptions: NextAuthOptions = {
         session.user = {
           id: token.id as string,
           username: token.username as string,
-          isSuperUser: token.isSuperUser as boolean
+          isSuperUser: token.isSuperUser as boolean,
+          name: token.username as string // Added the required name property
         };
       }
       return session;

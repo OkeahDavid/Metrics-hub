@@ -1,8 +1,14 @@
-// app/api/users/[id]/toggle-superuser/route.ts
-import { NextResponse } from "next/server";
-import prisma from "@/lib/db";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
+import prisma from "@/lib/db";
+import { handleApiError } from "@/lib/error-handler";
+import { createSuccessResponse } from "@/lib/api-response";
+
+interface UserResponse {
+  id: string;
+  username: string;
+  isSuperUser: boolean;
+}
 
 export async function POST(
   request: Request,
@@ -12,17 +18,17 @@ export async function POST(
     const session = await getServerSession(authOptions);
     
     if (!session) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
+      return handleApiError(
+        new Error("Unauthorized"),
+        "Authentication required"
       );
     }
 
     // Only superusers can toggle other users' status
     if (!session.user.isSuperUser) {
-      return NextResponse.json(
-        { error: "Only administrators can modify user permissions" },
-        { status: 403 }
+      return handleApiError(
+        new Error("Insufficient permissions"),
+        "Only administrators can modify user permissions",
       );
     }
     
@@ -32,9 +38,9 @@ export async function POST(
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
+      return handleApiError(
+        new Error("User not found"),
+        "The specified user could not be found",
       );
     }
 
@@ -44,15 +50,19 @@ export async function POST(
       data: { isSuperUser: !user.isSuperUser },
     });
 
-    return NextResponse.json({
+    const response: UserResponse = {
       id: updatedUser.id,
+      username: updatedUser.username,
       isSuperUser: updatedUser.isSuperUser,
-    });
-  } catch (error) {
-    console.error("Error toggling superuser status:", error);
-    return NextResponse.json(
-      { error: "Failed to update user" },
-      { status: 500 }
+    };
+
+    return createSuccessResponse(
+      response,
+      updatedUser.isSuperUser 
+        ? "User was granted administrator privileges" 
+        : "Administrator privileges were revoked"
     );
+  } catch (error) {
+    return handleApiError(error, "Failed to update user permissions");
   }
 }

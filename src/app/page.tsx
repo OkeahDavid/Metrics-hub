@@ -1,53 +1,15 @@
 import Link from 'next/link';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
-import UserNav from "@/components/auth/UserNav";
 
 export default async function HomePage() {
   const session = await getServerSession(authOptions);
   const isAuthenticated = !!session;
   
-  // Get user data for UserNav if authenticated
-  const user = isAuthenticated ? {
-    username: session.user?.username || "User",
-    isSuperUser: session.user?.isSuperUser || false
-  } : null;
 
   return (
-    <div className="bg-white">
+    <div className="bg-gray-900">
       <header className="relative">
-        <div className="bg-gray-900 pt-6">
-          <nav className="relative max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6" aria-label="Global">
-            <div className="flex items-center flex-1">
-              <div className="flex items-center justify-between w-full">
-                <h1 className="text-2xl font-bold text-white">Metrics Hub</h1>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              {isAuthenticated ? (
-                <>
-                  <Link href="/dashboard" className="text-base font-medium text-white hover:text-gray-300">
-                    Dashboard
-                  </Link>
-                  <Link href="/profile" className="text-base font-medium text-white hover:text-gray-300">
-                    Profile
-                  </Link>
-                  {user && <UserNav user={user} theme="dark" />}
-                </>
-              ) : (
-                <>
-                  <Link href="/auth/signin" className="text-base font-medium text-white hover:text-gray-300">
-                    Sign In
-                  </Link>
-                  <Link href="/auth/register" className="text-base font-medium text-white hover:text-gray-300">
-                    Register
-                  </Link>
-                </>
-              )}
-            </div>
-          </nav>
-        </div>
-
         <div className="relative bg-gray-900 overflow-hidden">
           <div className="pt-10 pb-16 sm:pb-24">
             <div className="mt-16 mx-auto max-w-7xl px-4 sm:mt-24 sm:px-6">
@@ -104,14 +66,14 @@ export default async function HomePage() {
 
       <main>
         {/* Feature section */}
-        <div className="py-16 bg-gray-50 overflow-hidden">
+        <div className="py-16 bg-gray-800 overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
-              <h2 className="text-base font-semibold text-indigo-600 tracking-wide uppercase">Features</h2>
-              <p className="mt-1 text-4xl font-extrabold text-gray-900 sm:text-5xl sm:tracking-tight">
+              <h2 className="text-base font-semibold text-indigo-400 tracking-wide uppercase">Features</h2>
+              <p className="mt-1 text-4xl font-extrabold text-gray-100 sm:text-5xl sm:tracking-tight">
                 Analytics made simple
               </p>
-              <p className="max-w-xl mt-5 mx-auto text-xl text-gray-500">
+              <p className="max-w-xl mt-5 mx-auto text-xl text-gray-300">
                 Track your website metrics without the complexity.
               </p>
             </div>
@@ -119,7 +81,7 @@ export default async function HomePage() {
             <div className="mt-12">
               <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
                 <div className="pt-6">
-                  <div className="flow-root bg-white rounded-lg px-6 pb-8">
+                  <div className="flow-root bg-gray-700 rounded-lg px-6 pb-8">
                     <div className="-mt-6">
                       <div>
                         <span className="inline-flex items-center justify-center p-3 bg-indigo-500 rounded-md shadow-lg">
@@ -128,8 +90,8 @@ export default async function HomePage() {
                           </svg>
                         </span>
                       </div>
-                      <h3 className="mt-8 text-lg font-medium text-gray-900 tracking-tight">Track Multiple Sites</h3>
-                      <p className="mt-5 text-base text-gray-500">
+                      <h3 className="mt-8 text-lg font-medium text-gray-100 tracking-tight">Track Multiple Sites</h3>
+                      <p className="mt-5 text-base text-gray-300">
                         Monitor page views, referrers, and visitor statistics across all your websites.
                       </p>
                     </div>
@@ -137,7 +99,7 @@ export default async function HomePage() {
                 </div>
 
                 <div className="pt-6">
-                  <div className="flow-root bg-white rounded-lg px-6 pb-8">
+                  <div className="flow-root bg-gray-700 rounded-lg px-6 pb-8">
                     <div className="-mt-6">
                       <div>
                         <span className="inline-flex items-center justify-center p-3 bg-indigo-500 rounded-md shadow-lg">
@@ -146,8 +108,8 @@ export default async function HomePage() {
                           </svg>
                         </span>
                       </div>
-                      <h3 className="mt-8 text-lg font-medium text-gray-900 tracking-tight">Privacy-Focused</h3>
-                      <p className="mt-5 text-base text-gray-500">
+                      <h3 className="mt-8 text-lg font-medium text-gray-100 tracking-tight">Privacy-Focused</h3>
+                      <p className="mt-5 text-base text-gray-300">
                         No cookies required, no personal data collected. Fully compliant with privacy regulations.
                       </p>
                     </div>
@@ -155,7 +117,7 @@ export default async function HomePage() {
                 </div>
 
                 <div className="pt-6">
-                  <div className="flow-root bg-white rounded-lg px-6 pb-8">
+                  <div className="flow-root bg-gray-700 rounded-lg px-6 pb-8">
                     <div className="-mt-6">
                       <div>
                         <span className="inline-flex items-center justify-center p-3 bg-indigo-500 rounded-md shadow-lg">
@@ -164,8 +126,8 @@ export default async function HomePage() {
                           </svg>
                         </span>
                       </div>
-                      <h3 className="mt-8 text-lg font-medium text-gray-900 tracking-tight">Simple Integration</h3>
-                      <p className="mt-5 text-base text-gray-500">
+                      <h3 className="mt-8 text-lg font-medium text-gray-100 tracking-tight">Simple Integration</h3>
+                      <p className="mt-5 text-base text-gray-300">
                         Add a small JavaScript snippet to your website and start collecting analytics immediately.
                       </p>
                     </div>
@@ -177,11 +139,11 @@ export default async function HomePage() {
         </div>
 
         {/* How it works section */}
-        <div className="py-16 bg-white">
+        <div className="py-16 bg-gray-900">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
-              <h2 className="text-base font-semibold text-indigo-600 tracking-wide uppercase">How it works</h2>
-              <p className="mt-2 text-3xl font-extrabold text-gray-900 tracking-tight sm:text-4xl">
+              <h2 className="text-base font-semibold text-indigo-400 tracking-wide uppercase">How it works</h2>
+              <p className="mt-2 text-3xl font-extrabold text-gray-100 tracking-tight sm:text-4xl">
                 Three simple steps to get started
               </p>
             </div>
@@ -192,8 +154,8 @@ export default async function HomePage() {
                   <div className="absolute flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white">
                     <span className="text-xl font-bold">1</span>
                   </div>
-                  <p className="ml-16 text-lg leading-6 font-medium text-gray-900">Create a project</p>
-                  <p className="mt-2 ml-16 text-base text-gray-500">
+                  <p className="ml-16 text-lg leading-6 font-medium text-gray-100">Create a project</p>
+                  <p className="mt-2 ml-16 text-base text-gray-300">
                     Set up a new project for each website you want to track.
                   </p>
                 </div>
@@ -202,8 +164,8 @@ export default async function HomePage() {
                   <div className="absolute flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white">
                     <span className="text-xl font-bold">2</span>
                   </div>
-                  <p className="ml-16 text-lg leading-6 font-medium text-gray-900">Add the tracking code</p>
-                  <p className="mt-2 ml-16 text-base text-gray-500">
+                  <p className="ml-16 text-lg leading-6 font-medium text-gray-100">Add the tracking code</p>
+                  <p className="mt-2 ml-16 text-base text-gray-300">
                     Copy and paste the provided JavaScript snippet into your website.
                   </p>
                 </div>
@@ -212,8 +174,8 @@ export default async function HomePage() {
                   <div className="absolute flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white">
                     <span className="text-xl font-bold">3</span>
                   </div>
-                  <p className="ml-16 text-lg leading-6 font-medium text-gray-900">View your analytics</p>
-                  <p className="mt-2 ml-16 text-base text-gray-500">
+                  <p className="ml-16 text-lg leading-6 font-medium text-gray-100">View your analytics</p>
+                  <p className="mt-2 ml-16 text-base text-gray-300">
                     Access your dashboard to see real-time statistics for all your websites.
                   </p>
                 </div>

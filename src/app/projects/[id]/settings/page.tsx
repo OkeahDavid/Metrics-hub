@@ -30,8 +30,15 @@ export default function ProjectSettingsPage() {
         }
         
         const data = await response.json();
-        setProject(data.project);
-        setProjectName(data.project.name);
+        // Handle both the new standardized format and the old format
+        const projectData = data.success ? data.data : data.project;
+        
+        if (!projectData) {
+          throw new Error('Project data not found in response');
+        }
+        
+        setProject(projectData);
+        setProjectName(projectData.name);
       } catch (err) {
         setError('Failed to load project');
         console.error(err);
@@ -51,9 +58,6 @@ interface Project {
     apiKey: string;
 }
 
-interface FetchProjectResponse {
-    project: Project;
-}
 
 const handleUpdateProject = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -75,9 +79,16 @@ const handleUpdateProject = async (e: React.FormEvent<HTMLFormElement>) => {
             throw new Error('Failed to update project');
         }
         
-        const data: FetchProjectResponse = await response.json();
-        setProject(data.project);
-        toast.success('Project updated successfully');
+        const data = await response.json();
+        // Handle both the new standardized format and the old format
+        const updatedProject = data.success ? data.data : data.project;
+        
+        if (updatedProject) {
+            setProject(updatedProject);
+            toast.success('Project updated successfully');
+        } else {
+            throw new Error('Invalid response format');
+        }
     } catch (err) {
         toast.error('Failed to update project');
         console.error(err);
@@ -98,8 +109,15 @@ const handleUpdateProject = async (e: React.FormEvent<HTMLFormElement>) => {
       }
       
       const data = await response.json();
-      setProject(data.project);
-      toast.success('API key regenerated successfully');
+      // Handle both the new standardized format and the old format
+      const updatedProject = data.success ? data.data : data.project;
+      
+      if (updatedProject) {
+        setProject(updatedProject);
+        toast.success('API key regenerated successfully');
+      } else {
+        throw new Error('Invalid response format');
+      }
     } catch (err) {
       toast.error('Failed to regenerate API key');
       console.error(err);

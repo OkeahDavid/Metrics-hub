@@ -58,7 +58,7 @@ export default function RegisterForm() {
       )}
       
       <div>
-        <label htmlFor="username" className="block text-sm font-medium leading-6 text-gray-200">
+        <label htmlFor="username" className="form-label">
           Username
         </label>
         <div className="mt-2">
@@ -69,13 +69,13 @@ export default function RegisterForm() {
             required
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="block w-full rounded-md border-0 py-1.5 bg-gray-800 text-gray-100 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+            className="form-input"
           />
         </div>
       </div>
 
       <div>
-        <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-200">
+        <label htmlFor="password" className="form-label">
           Password
         </label>
         <div className="mt-2 relative">
@@ -86,7 +86,7 @@ export default function RegisterForm() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="block w-full rounded-md border-0 py-1.5 bg-gray-800 text-gray-100 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6 pr-10"
+            className="form-input pr-10"
           />
           <button
             type="button"
@@ -99,7 +99,7 @@ export default function RegisterForm() {
       </div>
 
       <div>
-        <label htmlFor="confirmPassword" className="block text-sm font-medium leading-6 text-gray-200">
+        <label htmlFor="confirmPassword" className="form-label">
           Confirm Password
         </label>
         <div className="mt-2 relative">
@@ -110,7 +110,7 @@ export default function RegisterForm() {
             required
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            className="block w-full rounded-md border-0 py-1.5 bg-gray-800 text-gray-100 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6 pr-10"
+            className="form-input pr-10"
           />
           <button
             type="button"
@@ -126,7 +126,7 @@ export default function RegisterForm() {
         <button
           type="submit"
           disabled={isLoading}
-          className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50"
+          className="btn-primary w-full"
         >
           {isLoading ? "Creating account..." : "Register"}
         </button>

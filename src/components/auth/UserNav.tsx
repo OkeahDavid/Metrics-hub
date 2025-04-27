@@ -9,12 +9,11 @@ interface User {
   isSuperUser: boolean;
 }
 
-// Add a theme prop with default value 'light'
 export default function UserNav({ user, theme = 'light' }: { user: User; theme?: 'light' | 'dark' }) {
-  // Determine text color classes based on theme
+  // Use more consistent text colors based on our global theme
   const textColorClass = theme === 'dark' 
-    ? "text-white hover:text-gray-300" 
-    : "text-gray-900 hover:text-gray-700";
+    ? "text-gray-100 hover:text-white" 
+    : "text-gray-800 hover:text-gray-900";
 
   return (
     <Menu as="div" className="relative ml-3">
@@ -35,11 +34,11 @@ export default function UserNav({ user, theme = 'light' }: { user: User; theme?:
         leaveFrom="transform opacity-100 scale-100"
         leaveTo="transform opacity-0 scale-95"
       >
-        <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+        <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-gray-800 dark:ring-gray-700">
           {user.isSuperUser && (
             <Menu.Item>
               {({ active }) => (
-                <span className={`block px-4 py-2 text-sm ${active ? 'bg-gray-100' : ''} text-indigo-600 font-medium`}>
+                <span className={`block px-4 py-2 text-sm ${active ? 'bg-gray-100 dark:bg-gray-700' : ''} text-indigo-600 dark:text-indigo-400 font-medium`}>
                   Superuser
                 </span>
               )}
@@ -49,7 +48,7 @@ export default function UserNav({ user, theme = 'light' }: { user: User; theme?:
             {({ active }) => (
               <a
                 href="/profile"
-                className={`block px-4 py-2 text-sm ${active ? 'bg-gray-100' : ''} text-gray-700`}
+                className={`block px-4 py-2 text-sm ${active ? 'bg-gray-100 dark:bg-gray-700' : ''} text-gray-700 dark:text-gray-300`}
               >
                 Your Profile
               </a>
@@ -59,7 +58,7 @@ export default function UserNav({ user, theme = 'light' }: { user: User; theme?:
             {({ active }) => (
               <button
                 onClick={() => signOut({ callbackUrl: '/' })}
-                className={`block w-full text-left px-4 py-2 text-sm ${active ? 'bg-gray-100' : ''} text-gray-700`}
+                className={`block w-full text-left px-4 py-2 text-sm ${active ? 'bg-gray-100 dark:bg-gray-700' : ''} text-gray-700 dark:text-gray-300`}
               >
                 Sign out
               </button>

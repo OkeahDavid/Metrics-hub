@@ -47,7 +47,9 @@ export default function ReferrerChart({ projectId }: ReferrerChartProps) {
         }
         
         const data = await response.json();
-        setReferrerData(data.referrers);
+        // Handle both the new standardized format and the old format
+        const referrers = data.success ? data.data : data.referrers;
+        setReferrerData(referrers);
       } catch (err) {
         setError('Failed to load referrer data');
         console.error(err);
@@ -66,7 +68,7 @@ export default function ReferrerChart({ projectId }: ReferrerChartProps) {
         labels: ['No Data'],
         datasets: [{
           data: [0],
-          backgroundColor: 'rgba(209, 213, 219, 0.5)',
+          backgroundColor: 'rgba(75, 85, 99, 0.5)', // gray-600 with opacity for dark theme
         }]
       };
     }
@@ -93,7 +95,7 @@ export default function ReferrerChart({ projectId }: ReferrerChartProps) {
       datasets: [{
         label: 'Referrers',
         data: sortedData.map(item => item.count),
-        backgroundColor: 'rgba(99, 102, 241, 0.5)',
+        backgroundColor: 'rgba(99, 102, 241, 0.5)', // indigo with opacity
       }]
     };
   };
@@ -108,28 +110,47 @@ export default function ReferrerChart({ projectId }: ReferrerChartProps) {
       title: {
         display: true,
         text: 'Top Referrers',
+        color: 'rgb(229, 231, 235)' // text-gray-200 for dark theme
       },
     },
     scales: {
       y: {
         beginAtZero: true,
         ticks: {
-          precision: 0
+          precision: 0,
+          color: 'rgb(209, 213, 219)' // text-gray-300 for dark theme
+        },
+        grid: {
+          color: 'rgba(75, 85, 99, 0.3)' // gray-600 with opacity for dark theme
+        }
+      },
+      x: {
+        ticks: {
+          color: 'rgb(209, 213, 219)' // text-gray-300 for dark theme
+        },
+        grid: {
+          color: 'rgba(75, 85, 99, 0.3)' // gray-600 with opacity for dark theme
         }
       }
     }
   };
 
   if (isLoading) {
-    return <div className="h-64 flex items-center justify-center bg-gray-50">Loading referrer data...</div>;
+    return (
+      <div className="card h-full">
+        <div className="h-64 flex items-center justify-center">
+          <div className="w-full h-32 bg-gray-700 rounded animate-pulse"></div>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="h-64 flex items-center justify-center bg-gray-50 text-red-500">{error}</div>;
+    return <div className="h-64 flex items-center justify-center bg-gray-800 text-red-400">{error}</div>;
   }
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow h-full">
+    <div className="card h-full">
       <div className="h-64">
         <Bar data={processChartData()} options={options} />
       </div>

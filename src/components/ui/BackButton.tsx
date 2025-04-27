@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 type BackButtonProps = {
   fallbackUrl?: string;
@@ -9,13 +10,39 @@ type BackButtonProps = {
 
 export default function BackButton({ fallbackUrl = "/", className = "" }: BackButtonProps) {
   const router = useRouter();
+  
+  // Store current path in session storage whenever component mounts
+  useEffect(() => {
+    // Save current path to session storage for better navigation history
+    const currentPath = window.location.pathname;
+    const previousPaths = JSON.parse(sessionStorage.getItem('navigationHistory') || '[]');
+    
+    // Only add if it's different from the last path
+    if (previousPaths.length === 0 || previousPaths[previousPaths.length - 1] !== currentPath) {
+      previousPaths.push(currentPath);
+      sessionStorage.setItem('navigationHistory', JSON.stringify(previousPaths));
+    }
+  }, []);
 
   const handleBack = () => {
-    // Try to go back in history first
-    if (window.history.length > 1) {
+    // Try to use our session storage history first
+    const previousPaths = JSON.parse(sessionStorage.getItem('navigationHistory') || '[]');
+    
+    if (previousPaths.length > 1) {
+      // Remove current path
+      previousPaths.pop();
+      // Get the previous path
+      const previousPath = previousPaths.pop();
+      // Update storage
+      sessionStorage.setItem('navigationHistory', JSON.stringify(previousPaths));
+      
+      // Navigate to previous path
+      router.push(previousPath);
+    } else if (window.history.length > 1) {
+      // Fall back to browser history if our custom history isn't available
       router.back();
     } else {
-      // If no history, go to fallback URL (home page)
+      // If no history at all, go to fallback URL
       router.push(fallbackUrl);
     }
   };
@@ -23,7 +50,7 @@ export default function BackButton({ fallbackUrl = "/", className = "" }: BackBu
   return (
     <button
       onClick={handleBack}
-      className={`flex items-center text-gray-600 hover:text-gray-900 transition-colors ${className}`}
+      className={`flex items-center text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors ${className}`}
     >
       <svg 
         xmlns="http://www.w3.org/2000/svg" 

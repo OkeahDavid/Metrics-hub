@@ -1,79 +1,77 @@
-import { NextResponse } from 'next/server';
-import prisma from '@/lib/db';
+import { NextRequest } from 'next/server';
+import { AnalyticsService } from '@/lib/services/analytics-service';
+import { ProjectService } from '@/lib/services/project-service';
+import { handleApiError } from '@/lib/error-handler';
+import { createSuccessResponse } from '@/lib/api-response';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth';
+import { parseISO } from 'date-fns';
+
+interface DeviceTypeData {
+  deviceType: string;
+  count: number;
+}
 
 export async function GET(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    // Await params before destructuring
-    const resolvedParams = await params;
-    const { id } = resolvedParams;
-    const projectId = id;
+    // Get the user session for authorization
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return handleApiError(new Error('Unauthorized'), 'Authentication required');
+    }
+
+    const { id } = params;
+
+    // Parse date range from query params
+    const searchParams = request.nextUrl.searchParams;
+    const fromParam = searchParams.get('from');
+    const toParam = searchParams.get('to');
     
-    // Get project to verify it exists
-    const project = await prisma.project.findUnique({
-      where: { id: projectId },
-    });
+    let fromDate: Date, toDate: Date;
+    
+    if (fromParam && toParam) {
+      // Use provided date range
+      fromDate = parseISO(fromParam);
+      toDate = parseISO(toParam);
+    } else {
+      // Default to last 7 days if no dates provided
+      toDate = new Date();
+      fromDate = new Date(toDate);
+      fromDate.setDate(fromDate.getDate() - 7);
+    }
+    
+    // Validate dates
+    if (isNaN(fromDate.getTime()) || isNaN(toDate.getTime())) {
+      return handleApiError(
+        new Error('Invalid date format'), 
+        'Please provide dates in ISO format (YYYY-MM-DD)'
+      );
+    }
+
+    // Use the ProjectService to verify user has access to this project
+    const project = await ProjectService.getProjectById(
+      id,
+      session.user.id,
+      session.user.isSuperUser
+    );
 
     if (!project) {
-      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+      return handleApiError(new Error('Project not found or access denied'), 'Project not found');
     }
 
-    console.log("Fetching device types for project:", projectId);
-
-    // Get all pageviews to debug
-    const allPageViews = await prisma.pageView.findMany({
-      where: {
-        projectId,
-      },
-      select: {
-        deviceType: true,
-        id: true,
-        createdAt: true,
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-      take: 10, // Get the latest 10 for debugging
-    });
-    
-    console.log("Latest page views:", allPageViews);
-
-    // Get device type breakdown
-    const deviceTypeData = await prisma.pageView.groupBy({
-      by: ['deviceType'],
-      where: {
-        projectId,
-      },
-      _count: true,
-    });
-
-    console.log("Device type data from DB:", deviceTypeData);
-
-    const deviceTypes = deviceTypeData.map(item => ({
-      deviceType: item.deviceType || 'Unknown',
-      count: item._count,
-    }));
-
-    // If no data with device types, provide some default categories
-    if (deviceTypes.length === 0) {
-      console.log("No device types found, returning defaults");
-      return NextResponse.json({
-        deviceTypes: [
-          { deviceType: 'desktop', count: 0 },
-          { deviceType: 'mobile', count: 0 },
-          { deviceType: 'tablet', count: 0 },
-        ],
-      });
-    }
+    // Use the AnalyticsService to fetch device type data
+    const deviceTypesData = await AnalyticsService.getDeviceTypes(id, fromDate, toDate) as DeviceTypeData[];
 
     // Ensure we always have all three device types in the response
-    const finalDeviceTypes = [...deviceTypes];
-    const deviceTypeMap: Record<string, boolean> = deviceTypes.reduce((acc: Record<string, boolean>, item) => {
+    const deviceTypeMap: Record<string, boolean> = deviceTypesData.reduce((acc: Record<string, boolean>, item) => {
       acc[item.deviceType] = true;
       return acc;
     }, {});
+
+    const finalDeviceTypes = [...deviceTypesData];
 
     if (!deviceTypeMap['desktop']) {
       finalDeviceTypes.push({ deviceType: 'desktop', count: 0 });
@@ -85,23 +83,14 @@ export async function GET(
       finalDeviceTypes.push({ deviceType: 'tablet', count: 0 });
     }
 
-    console.log("Final device types to return:", finalDeviceTypes);
-
-    return new NextResponse(
-      JSON.stringify({ deviceTypes: finalDeviceTypes }),
+    return createSuccessResponse(
+      finalDeviceTypes,
+      'Device type data retrieved successfully',
       {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-store, max-age=0' // Prevent caching
-        }
+        'Cache-Control': 'public, max-age=60' // Cache for 1 minute
       }
     );
   } catch (error) {
-    console.error('Error fetching device types:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch device type data' },
-      { status: 500 }
-    );
+    return handleApiError(error, 'Failed to fetch device type data');
   }
 }

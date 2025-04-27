@@ -1,49 +1,34 @@
-import { NextResponse } from 'next/server';
-import prisma from '@/lib/db';
-import crypto from 'crypto';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
+import { handleApiError } from "@/lib/error-handler";
+import { createSuccessResponse, createCreatedResponse } from "@/lib/api-response";
+import { ProjectService } from "@/lib/services/project-service";
 
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
     
     if (!session) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return handleApiError(new Error('Unauthorized'), 'Authentication required');
     }
 
     const data = await request.json();
     const { name } = data;
 
     if (!name || typeof name !== 'string') {
-      return NextResponse.json(
-        { error: 'Project name is required' },
-        { status: 400 }
-      );
+      return handleApiError(new Error('Project name is required'), 'Validation failed');
     }
 
-    // Generate a random API key
-    const apiKey = crypto.randomBytes(16).toString('hex');
+    // Using the project service to create a project
+    const project = await ProjectService.createProject(name, session.user.id);
 
-    // Create the project with user association
-    const project = await prisma.project.create({
-      data: {
-        name,
-        apiKey,
-        userId: session.user.id, // Associate with current user
-      },
+    return createCreatedResponse({
+      id: project.id, 
+      name: project.name, 
+      apiKey: project.apiKey
     });
-
-    return NextResponse.json({ id: project.id, name: project.name, apiKey: project.apiKey });
   } catch (error) {
-    console.error('Error creating project:', error);
-    return NextResponse.json(
-      { error: 'Failed to create project' },
-      { status: 500 }
-    );
+    return handleApiError(error, 'Failed to create project');
   }
 }
 
@@ -52,26 +37,17 @@ export async function GET() {
     const session = await getServerSession(authOptions);
     
     if (!session) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return handleApiError(new Error('Unauthorized'), 'Authentication required');
     }
 
-    // If superuser, return all projects, otherwise filter by user
-    const projects = await prisma.project.findMany({
-      where: session.user.isSuperUser 
-        ? {} 
-        : { userId: session.user.id },
-      orderBy: { createdAt: 'desc' },
-    });
-    
-    return NextResponse.json(projects);
-  } catch (error) {
-    console.error('Error fetching projects:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch projects' },
-      { status: 500 }
+    // Using the project service to get projects
+    const projects = await ProjectService.getProjects(
+      session.user.id, 
+      session.user.isSuperUser
     );
+    
+    return createSuccessResponse(projects);
+  } catch (error) {
+    return handleApiError(error, 'Failed to fetch projects');
   }
 }

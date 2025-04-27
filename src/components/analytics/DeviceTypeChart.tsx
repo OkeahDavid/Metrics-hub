@@ -39,8 +39,11 @@ export default function DeviceTypeChart({ projectId }: DeviceTypeChartProps) {
         const data = await response.json();
         console.log('Device data response:', data);
         
-        if (data.deviceTypes && Array.isArray(data.deviceTypes)) {
-          setDeviceData(data.deviceTypes);
+        // Handle both the new standardized format and the old format
+        const deviceTypes = data.success ? data.data : data.deviceTypes;
+        
+        if (deviceTypes && Array.isArray(deviceTypes)) {
+          setDeviceData(deviceTypes);
         } else {
           console.error('Invalid device data format:', data);
           setError('Invalid data format received');
@@ -69,7 +72,7 @@ export default function DeviceTypeChart({ projectId }: DeviceTypeChartProps) {
         datasets: [
           {
             data: [1],
-            backgroundColor: ['#e5e7eb'],
+            backgroundColor: ['#4b5563'], // gray-600 for dark theme
             borderWidth: 0,
           },
         ],
@@ -106,7 +109,7 @@ export default function DeviceTypeChart({ projectId }: DeviceTypeChartProps) {
             'rgba(245, 158, 11, 0.7)',  // Amber (tablet)
           ],
           borderWidth: 1,
-          borderColor: '#ffffff',
+          borderColor: '#374151', // gray-700 for dark theme border
         },
       ],
     };
@@ -117,28 +120,38 @@ export default function DeviceTypeChart({ projectId }: DeviceTypeChartProps) {
     plugins: {
       legend: {
         position: 'bottom' as const,
+        labels: {
+          color: 'rgb(209, 213, 219)' // text-gray-300 for dark theme
+        }
       },
       title: {
         display: true,
         text: 'Device Types',
+        color: 'rgb(229, 231, 235)' // text-gray-200 for dark theme
       },
     },
   };
 
   if (isLoading) {
-    return <div className="h-64 flex items-center justify-center bg-gray-50">Loading device data...</div>;
+    return (
+      <div className="card h-full">
+        <div className="h-64 flex items-center justify-center">
+          <div className="h-40 w-40 rounded-full bg-gray-700 animate-pulse"></div>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="h-64 flex items-center justify-center bg-gray-50 text-red-500">{error}</div>;
+    return <div className="h-64 flex items-center justify-center bg-gray-800 text-red-400">{error}</div>;
   }
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow h-full">
+    <div className="card h-full">
       <div className="h-64 flex items-center justify-center">
         <Pie data={getChartData()} options={options} />
       </div>
-      <div className="mt-2 text-xs text-gray-500 text-center">
+      <div className="mt-2 text-xs text-gray-400 text-center">
         {deviceData.map(item => (
           <div key={item.deviceType}>{item.deviceType}: {item.count}</div>
         ))}
