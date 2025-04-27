@@ -71,11 +71,11 @@ export default function ProjectPage() {
       <ToastContainer position="top-right" autoClose={3000} />
       
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">{project.name} - Analytics</h2>
+        <h2 className="text-2xl font-bold text-gray-100">{project.name} - Analytics</h2>
         <div className="flex space-x-3">
           <button
             onClick={() => setShowInstallation(!showInstallation)}
-            className="px-3 py-2 text-black text-sm bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50"
+            className="px-3 py-2 text-gray-100 text-sm bg-gray-700 border border-gray-600 rounded-md shadow-sm hover:bg-gray-600"
           >
             {showInstallation ? 'Hide Setup' : 'Setup Instructions'}
           </button>
@@ -88,7 +88,7 @@ export default function ProjectPage() {
                 className={`px-4 py-2 text-sm font-medium ${
                   timeRange === days
                     ? 'bg-indigo-600 text-white'
-                    : 'bg-white text-gray-700 hover:bg-gray-50'
+                    : 'bg-gray-700 text-gray-200 hover:bg-gray-600'
                 } ${days === 7 ? 'rounded-l-md' : ''} ${days === 90 ? 'rounded-r-md' : ''}`}
               >
                 {days} Days
@@ -100,28 +100,28 @@ export default function ProjectPage() {
       
       {/* Installation section - now collapsible */}
       {showInstallation && (
-        <div className="mb-6 bg-white border border-gray-200 rounded-lg shadow-sm">
-          <div className="p-4 border-b border-gray-200">
-            <h3 className="text-lg text-black font-medium">Installation Instructions</h3>
+        <div className="mb-6 bg-gray-800 border border-gray-700 rounded-lg shadow-sm">
+          <div className="p-4 border-b border-gray-700">
+            <h3 className="text-lg text-gray-100 font-medium">Installation Instructions</h3>
           </div>
           <div className="p-4">
             <div className="mb-4">
               <div className="flex items-center justify-between mb-2">
-                <h4 className="text-sm font-medium text-gray-700">Step 1: Copy your API Key</h4>
+                <h4 className="text-sm font-medium text-gray-300">Step 1: Copy your API Key</h4>
                 <CopyToClipboard text={project.apiKey} onCopy={handleCopySuccess}>
-                  <button className="px-3 py-1 text-xs text-indigo-600 hover:bg-indigo-50 rounded-md">
+                  <button className="px-3 py-1 text-xs text-indigo-400 hover:bg-gray-700 rounded-md">
                     Copy Key
                   </button>
                 </CopyToClipboard>
               </div>
-              <code className="block bg-gray-800 text-white p-2 rounded-md overflow-x-auto text-sm font-mono">
+              <code className="block bg-gray-900 text-gray-100 p-2 rounded-md overflow-x-auto text-sm font-mono">
                 {project.apiKey}
               </code>
             </div>
             
             <div>
-              <h4 className="text-sm font-medium text-gray-700 mb-2">Step 2: Add this script to your website</h4>
-              <pre className="bg-gray-800 text-white p-3 rounded-md overflow-x-auto text-xs">
+              <h4 className="text-sm font-medium text-gray-300 mb-2">Step 2: Add this script to your website</h4>
+              <pre className="bg-gray-900 text-gray-100 p-3 rounded-md overflow-x-auto text-xs">
                 {`<script>
                 (function() {
                   // Generate a session ID
@@ -250,7 +250,7 @@ export default function ProjectPage() {
               </script>`} 
                 onCopy={() => toast.success('Tracking script copied to clipboard!')}
               >
-                <button className="mt-2 px-3 py-1 text-sm text-indigo-600 hover:bg-indigo-50 rounded-md">
+                <button className="mt-2 px-3 py-1 text-sm text-indigo-400 hover:bg-gray-700 rounded-md">
                   Copy Script
                 </button>
               </CopyToClipboard>

@@ -4,6 +4,7 @@ import { JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import AuthProvider from "@/components/auth/AuthProvider";
 import QueryProvider from "@/components/ui/QueryProvider";
+import GlobalNav from "@/components/ui/GlobalNav";
 
 // Replace Geist with Inter (a popular sans-serif font)
 const inter = Inter({
@@ -33,7 +34,14 @@ export default function RootLayout({
         className={`${inter.variable} ${jetbrainsMono.variable} antialiased`}
       >
         <QueryProvider>
-          <AuthProvider>{children}</AuthProvider>
+          <AuthProvider>
+            <div className="min-h-screen bg-gray-900 text-gray-100">
+              <GlobalNav />
+              <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                {children}
+              </main>
+            </div>
+          </AuthProvider>
         </QueryProvider>
       </body>
     </html>
