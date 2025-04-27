@@ -50,7 +50,7 @@ export default function BackButton({ fallbackUrl = "/", className = "" }: BackBu
   return (
     <button
       onClick={handleBack}
-      className={`flex items-center text-gray-600 hover:text-gray-900 transition-colors ${className}`}
+      className={`flex items-center text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors ${className}`}
     >
       <svg 
         xmlns="http://www.w3.org/2000/svg" 

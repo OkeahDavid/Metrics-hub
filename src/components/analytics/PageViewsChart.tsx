@@ -89,6 +89,7 @@ export default function PageViewsChart({ projectId, days = 7 }: PageViewsChartPr
     return pageViewsData;
   };
 
+  // Chart configuration with dark mode support
   const chartData = {
     labels: ensureDataForAllDays().map(item => format(new Date(item.date), 'MMM d')),
     datasets: [
@@ -107,17 +108,33 @@ export default function PageViewsChart({ projectId, days = 7 }: PageViewsChartPr
     plugins: {
       legend: {
         position: 'top' as const,
+        labels: {
+          color: 'rgb(229, 231, 235)' // text-gray-200
+        }
       },
       title: {
         display: true,
         text: `Page Views - Last ${days} Days`,
+        color: 'rgb(229, 231, 235)' // text-gray-200
       },
     },
     scales: {
       y: {
         beginAtZero: true,
         ticks: {
-          precision: 0
+          precision: 0,
+          color: 'rgb(209, 213, 219)' // text-gray-300
+        },
+        grid: {
+          color: 'rgba(75, 85, 99, 0.3)' // gray-600 with opacity
+        }
+      },
+      x: {
+        ticks: {
+          color: 'rgb(209, 213, 219)' // text-gray-300
+        },
+        grid: {
+          color: 'rgba(75, 85, 99, 0.3)' // gray-600 with opacity
         }
       }
     }
@@ -125,25 +142,25 @@ export default function PageViewsChart({ projectId, days = 7 }: PageViewsChartPr
 
   if (isLoading) {
     return (
-      <div className="bg-white p-4 rounded-lg shadow">
+      <div className="card">
         <div className="flex justify-between items-center mb-4">
-          <div className="h-6 bg-gray-200 rounded animate-pulse w-40"></div>
-          <div className="inline-flex rounded-md shadow-sm bg-gray-200 h-8 w-32 animate-pulse"></div>
+          <div className="h-6 bg-gray-700 rounded animate-pulse w-40"></div>
+          <div className="inline-flex rounded-md shadow-sm bg-gray-700 h-8 w-32 animate-pulse"></div>
         </div>
-        <div className="h-64 bg-gray-200 rounded animate-pulse"></div>
+        <div className="h-64 bg-gray-700 rounded animate-pulse"></div>
       </div>
     );
   }
 
   if (error) {
-    return <div className="h-64 flex items-center justify-center bg-gray-50 text-red-500">{error}</div>;
+    return <div className="h-64 flex items-center justify-center bg-gray-800 text-red-400">{error}</div>;
   }
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow">
+    <div className="card">
       <div className="flex justify-between items-center mb-4">
-        <div className="text-lg text-black font-medium">
-          Total: <span className="text-indigo-600">{totalViews} views</span>
+        <div className="text-lg text-gray-100 font-medium">
+          Total: <span className="text-indigo-400">{totalViews} views</span>
         </div>
         <div className="inline-flex rounded-md shadow-sm">
           <button
@@ -152,7 +169,7 @@ export default function PageViewsChart({ projectId, days = 7 }: PageViewsChartPr
             className={`px-4 py-2 text-sm font-medium rounded-l-md ${
               chartType === 'line'
                 ? 'bg-indigo-600 text-white'
-                : 'bg-white text-gray-700 hover:bg-gray-50'
+                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
             }`}
           >
             Line
@@ -163,7 +180,7 @@ export default function PageViewsChart({ projectId, days = 7 }: PageViewsChartPr
             className={`px-4 py-2 text-sm font-medium rounded-r-md ${
               chartType === 'bar'
                 ? 'bg-indigo-600 text-white'
-                : 'bg-white text-gray-700 hover:bg-gray-50'
+                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
             }`}
           >
             Bar

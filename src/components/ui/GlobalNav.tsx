@@ -53,7 +53,7 @@ export default function GlobalNav() {
           <div className="flex items-center">
             <div className="flex-shrink-0">
               <Link href="/">
-                <h1 className="text-white text-xl font-bold">Metrics Hub</h1>
+                <h1 className="text-gray-100 text-xl font-bold">Metrics Hub</h1>
               </Link>
             </div>
             <div className="hidden md:block ml-10">

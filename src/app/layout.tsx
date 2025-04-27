@@ -29,13 +29,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="dark" suppressHydrationWarning>
       <body
         className={`${inter.variable} ${jetbrainsMono.variable} antialiased`}
       >
         <QueryProvider>
           <AuthProvider>
-            <div className="min-h-screen bg-gray-900 text-gray-100">
+            <div className="min-h-screen bg-background text-foreground dark:bg-gray-900 dark:text-gray-100">
               <GlobalNav />
               <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {children}
