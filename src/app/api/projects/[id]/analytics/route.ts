@@ -33,10 +33,15 @@ export async function GET(request: NextRequest, props: Props) {
     const fromParam = searchParams.get('from');
     const toParam = searchParams.get('to');
     const daysParam = searchParams.get('days');
+    const allTimeParam = searchParams.get('all');
     
     let fromDate: Date, toDate: Date;
     
-    if (fromParam && toParam) {
+    if (allTimeParam === 'true') {
+      // All time - set fromDate to epoch beginning and toDate to current
+      toDate = new Date();
+      fromDate = new Date(0); // January 1, 1970
+    } else if (fromParam && toParam) {
       // Use provided date range
       fromDate = parseISO(fromParam);
       toDate = parseISO(toParam);
