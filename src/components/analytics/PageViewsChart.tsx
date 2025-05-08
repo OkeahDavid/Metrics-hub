@@ -34,7 +34,7 @@ interface PageViewsData {
 
 interface PageViewsChartProps {
   projectId: string;
-  days?: number;
+  days?: number | 'all';
 }
 
 export default function PageViewsChart({ projectId, days = 7 }: PageViewsChartProps) {
@@ -48,7 +48,12 @@ export default function PageViewsChart({ projectId, days = 7 }: PageViewsChartPr
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch(`/api/projects/${projectId}/analytics?days=${days}`);
+        // Handle the 'all' case by not including the days parameter
+        const url = days === 'all' 
+          ? `/api/projects/${projectId}/analytics?all=true` 
+          : `/api/projects/${projectId}/analytics?days=${days}`;
+        
+        const response = await fetch(url);
         
         if (!response.ok) {
           throw new Error('Failed to fetch analytics data');
@@ -76,14 +81,18 @@ export default function PageViewsChart({ projectId, days = 7 }: PageViewsChartPr
   // If no data yet, provide empty dates for the last N days
   const ensureDataForAllDays = () => {
     if (pageViewsData.length === 0) {
-      const endDate = new Date();
-      const startDate = subDays(endDate, days - 1);
-      
-      return eachDayOfInterval({ start: startDate, end: endDate })
-        .map(date => ({
-          date: format(date, 'yyyy-MM-dd'),
-          count: 0
-        }));
+      // Only create default data for numeric day ranges
+      if (days !== 'all') {
+        const endDate = new Date();
+        const startDate = subDays(endDate, Number(days) - 1);
+        
+        return eachDayOfInterval({ start: startDate, end: endDate })
+          .map(date => ({
+            date: format(date, 'yyyy-MM-dd'),
+            count: 0
+          }));
+      }
+      return [{ date: format(new Date(), 'yyyy-MM-dd'), count: 0 }];
     }
     
     return pageViewsData;
@@ -114,7 +123,7 @@ export default function PageViewsChart({ projectId, days = 7 }: PageViewsChartPr
       },
       title: {
         display: true,
-        text: `Page Views - Last ${days} Days`,
+        text: days === 'all' ? 'Page Views - All Time' : `Page Views - Last ${days} Days`,
         color: 'rgb(229, 231, 235)' // text-gray-200
       },
     },

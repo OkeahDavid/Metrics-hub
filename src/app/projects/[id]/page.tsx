@@ -19,7 +19,7 @@ export default function ProjectPage() {
   
   const [project, setProject] = useState<{ name: string; id: string; apiKey: string } | null>(null);
   const [loading, setLoading] = useState(true);
-  const [timeRange, setTimeRange] = useState(7);
+  const [timeRange, setTimeRange] = useState<number | 'all'>(7);
   const [error, setError] = useState('');
   const [showInstallation, setShowInstallation] = useState(false);
 
@@ -81,17 +81,17 @@ export default function ProjectPage() {
           </button>
           <ExportDataButton projectId={project.id} projectName={project.name} />
           <div className="inline-flex rounded-md shadow-sm">
-            {[7, 14, 30, 90].map((days) => (
+            {[7, 14, 30, 90, 'all'].map((days) => (
               <button
-                key={days}
-                onClick={() => setTimeRange(days)}
+                key={days.toString()}
+                onClick={() => setTimeRange(days === 'all' ? 'all' : Number(days))}
                 className={`px-4 py-2 text-sm font-medium ${
                   timeRange === days
                     ? 'bg-indigo-600 text-white'
                     : 'bg-gray-700 text-gray-200 hover:bg-gray-600'
-                } ${days === 7 ? 'rounded-l-md' : ''} ${days === 90 ? 'rounded-r-md' : ''}`}
+                } ${days === 7 ? 'rounded-l-md' : ''} ${days === 'all' ? 'rounded-r-md' : ''}`}
               >
-                {days} Days
+                {days === 'all' ? 'All Time' : `${days} Days`}
               </button>
             ))}
           </div>
