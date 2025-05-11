@@ -9,31 +9,24 @@ export class AnalyticsService {
    * Get page views for a project within a date range
    */
   static async getPageViews(projectId: string, from: Date, to: Date) {
-    // Get all page views in the date range
-    const pageViews = await prisma.pageView.findMany({
-      where: {
-        projectId: projectId,
-        createdAt: {
-          gte: from,
-          lte: to,
-        },
-      },
-      select: {
-        createdAt: true,
-      },
-    });
-
-    // Group by date
-    const pageViewsByDate = pageViews.reduce((acc: Record<string, number>, pageView: { createdAt: string | number | Date; }) => {
-      const date = format(pageView.createdAt, 'yyyy-MM-dd');
-      acc[date] = (acc[date] || 0) + 1;
-      return acc;
-    }, {});
+    // Use database aggregation instead of loading all records
+    const pageViewsAggregation = await prisma.$queryRaw`
+      SELECT 
+        DATE("createdAt") as date,
+        COUNT(*) as count
+      FROM "PageView"
+      WHERE 
+        "projectId" = ${projectId}
+        AND "createdAt" >= ${from}
+        AND "createdAt" <= ${to}
+      GROUP BY DATE("createdAt")
+      ORDER BY date ASC
+    `;
 
     // Format for the response
-    return Object.entries(pageViewsByDate).map(([date, count]) => ({
-      date,
-      count,
+    return (pageViewsAggregation as { date: Date, count: number }[]).map(item => ({
+      date: format(item.date, 'yyyy-MM-dd'),
+      count: Number(item.count),
     }));
   }
 

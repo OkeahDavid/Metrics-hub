@@ -1,7 +1,8 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useState, useEffect, useCallback } from 'react';
+import { subDays } from 'date-fns';
 
 // Define types for analytics data
 interface PageViewsData {
@@ -29,7 +30,7 @@ interface CountryData {
   count: number;
 }
 
-interface DateRange {
+export interface DateRange {
   from: Date;
   to: Date;
 }
@@ -39,14 +40,61 @@ interface DateRange {
  * Provides automatic caching and background refetching
  */
 export function useProjectAnalytics(projectId: string) {
+  const queryClient = useQueryClient();
+  const [isChangingRange, setIsChangingRange] = useState(false);
   const [dateRange, setDateRange] = useState<DateRange>({
-    from: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // Last 7 days
+    from: subDays(new Date(), 6), // Last 7 days including today
     to: new Date()
   });
 
   // Convert dates to ISO strings for API calls
   const fromDate = dateRange.from.toISOString();
   const toDate = dateRange.to.toISOString();
+
+  // Enhanced date range setter with loading state
+  const updateDateRange = useCallback((newRange: DateRange) => {
+    setIsChangingRange(true);
+    setDateRange(newRange);
+  }, []);
+
+  // This effect will prefetch data for common date ranges to improve performance
+  useEffect(() => {
+    // Prefetch data for common date ranges
+    const prefetchCommonRanges = async () => {
+      const now = new Date();
+      const commonRanges = [
+        { from: subDays(now, 6), to: now }, // 7 days
+        { from: subDays(now, 13), to: now }, // 14 days
+        { from: subDays(now, 29), to: now }, // 30 days
+      ];
+
+      for (const range of commonRanges) {
+        const fromString = range.from.toISOString();
+        const toString = range.to.toISOString();
+        
+        // Prefetch page views data for this range
+        queryClient.prefetchQuery({
+          queryKey: ['analytics', projectId, 'pageViews', fromString, toString],
+          queryFn: async () => {
+            const params = new URLSearchParams({
+              from: fromString,
+              to: toString
+            });
+            const response = await fetch(`/api/projects/${projectId}/analytics?${params}`);
+            if (!response.ok) return [];
+            const data = await response.json();
+            return data.success ? data.data : data;
+          },
+          staleTime: 10 * 60 * 1000, // 10 minutes
+        });
+      }
+    };
+
+    // Only prefetch if we have a project ID and not during SSR
+    if (projectId && typeof window !== 'undefined') {
+      prefetchCommonRanges();
+    }
+  }, [projectId, queryClient]);
 
   // Fetch page views data
   const pageViews = useQuery({
@@ -56,7 +104,9 @@ export function useProjectAnalytics(projectId: string) {
         from: fromDate,
         to: toDate
       });
-      const response = await fetch(`/api/projects/${projectId}/analytics?${params}`);
+      const response = await fetch(`/api/projects/${projectId}/analytics?${params}`, {
+        cache: 'force-cache'
+      });
       if (!response.ok) {
         throw new Error('Failed to fetch page views data');
       }
@@ -74,7 +124,9 @@ export function useProjectAnalytics(projectId: string) {
         from: fromDate,
         to: toDate
       });
-      const response = await fetch(`/api/projects/${projectId}/device-types?${params}`);
+      const response = await fetch(`/api/projects/${projectId}/device-types?${params}`, {
+        cache: 'force-cache'
+      });
       if (!response.ok) {
         throw new Error('Failed to fetch device types data');
       }
@@ -92,7 +144,9 @@ export function useProjectAnalytics(projectId: string) {
         from: fromDate,
         to: toDate
       });
-      const response = await fetch(`/api/projects/${projectId}/referrers?${params}`);
+      const response = await fetch(`/api/projects/${projectId}/referrers?${params}`, {
+        cache: 'force-cache'
+      });
       if (!response.ok) {
         throw new Error('Failed to fetch referrers data');
       }
@@ -110,7 +164,9 @@ export function useProjectAnalytics(projectId: string) {
         from: fromDate,
         to: toDate
       });
-      const response = await fetch(`/api/projects/${projectId}/top-pages?${params}`);
+      const response = await fetch(`/api/projects/${projectId}/top-pages?${params}`, {
+        cache: 'force-cache'
+      });
       if (!response.ok) {
         throw new Error('Failed to fetch top pages data');
       }
@@ -128,7 +184,9 @@ export function useProjectAnalytics(projectId: string) {
         from: fromDate,
         to: toDate
       });
-      const response = await fetch(`/api/projects/${projectId}/countries?${params}`);
+      const response = await fetch(`/api/projects/${projectId}/countries?${params}`, {
+        cache: 'force-cache'
+      });
       if (!response.ok) {
         throw new Error('Failed to fetch countries data');
       }
@@ -152,6 +210,33 @@ export function useProjectAnalytics(projectId: string) {
     staleTime: 30 * 1000, // 30 seconds - refresh more frequently for live data
     refetchInterval: 30 * 1000, // Auto refetch every 30 seconds
   });
+
+  // Detect when all queries have finished loading and reset loading state
+  useEffect(() => {
+    if (isChangingRange && 
+        !pageViews.isLoading && 
+        !deviceTypes.isLoading && 
+        !referrers.isLoading && 
+        !topPages.isLoading && 
+        !countries.isLoading) {
+      setIsChangingRange(false);
+    }
+  }, [
+    isChangingRange, 
+    pageViews.isLoading, 
+    deviceTypes.isLoading, 
+    referrers.isLoading, 
+    topPages.isLoading, 
+    countries.isLoading
+  ]);
+
+  // Calculate overall loading state
+  const isLoading = isChangingRange || 
+    pageViews.isLoading || 
+    deviceTypes.isLoading || 
+    referrers.isLoading || 
+    topPages.isLoading || 
+    countries.isLoading;
 
   return {
     pageViews: {
@@ -185,6 +270,7 @@ export function useProjectAnalytics(projectId: string) {
       error: liveVisitors.error,
     },
     dateRange,
-    setDateRange,
+    setDateRange: updateDateRange,
+    isLoading,
   };
 }
