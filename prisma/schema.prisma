@@ -17,6 +17,17 @@ model User {
   projects    Project[]
 }
 
+model Project {
+  id        String     @id @default(uuid())
+  name      String
+  apiKey    String     @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  userId    String?
+  pageViews PageView[]
+  user      User?      @relation(fields: [userId], references: [id])
+}
+
 model PageView {
   id         String   @id @default(uuid())
   createdAt  DateTime @default(now())
@@ -31,17 +42,11 @@ model PageView {
   projectId  String
   project    Project  @relation(fields: [projectId], references: [id])
 
-  @@index([projectId])
-  @@index([createdAt])
-}
-
-model Project {
-  id        String     @id @default(uuid())
-  name      String
-  apiKey    String     @unique
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  userId    String?
-  pageViews PageView[]
-  user      User?      @relation(fields: [userId], references: [id])
+  // Composite indexes for optimal query performance
+  @@index([projectId, createdAt])           // Main analytics queries
+  @@index([projectId, deviceType])          // Device type analytics
+  @@index([projectId, referrer])            // Referrer analytics  
+  @@index([projectId, page])                // Top pages analytics
+  @@index([projectId, country])             // Country analytics
+  @@index([projectId, sessionId, createdAt]) // Live visitors
 }
