@@ -25,7 +25,7 @@ export default function ProjectPage() {
   const [showInstallation, setShowInstallation] = useState(false);
   
   // Use our improved analytics hook
-  const analytics = useProjectAnalytics(id);
+  const { analytics, isLoading, setDateRange } = useProjectAnalytics(id);
 
   const fetchProject = useCallback(async () => {
     try {
@@ -90,8 +90,8 @@ export default function ProjectPage() {
       {/* Date range selector */}
       <div className="bg-gray-800 p-4 rounded-lg shadow-sm">
         <DateRangeSelector 
-          onChange={analytics.setDateRange} 
-          isLoading={analytics.isLoading} 
+          onChange={setDateRange} 
+          isLoading={isLoading} 
         />
       </div>
       
@@ -354,23 +354,23 @@ fetch("https://metrics-hub.netlify.app/api/track?key=${project.apiKey}&p=/curren
       )}
       
       {/* Main analytics dashboard */}
-      <div className={`grid grid-cols-1 lg:grid-cols-3 gap-6 ${analytics.isLoading ? 'opacity-70' : ''}`}>
+      <div className={`grid grid-cols-1 lg:grid-cols-3 gap-6 ${isLoading ? 'opacity-70' : ''}`}>
         <div className="lg:col-span-2">
           <div className="card h-full">
             <h3 className="text-lg text-gray-100 font-medium mb-4">Page Views</h3>
-            {analytics.pageViews.isLoading ? (
+            {analytics.isLoading ? (
               <div className="h-64 flex items-center justify-center">
                 <div className="w-full h-32 bg-gray-700 rounded animate-pulse"></div>
               </div>
-            ) : analytics.pageViews.error ? (
+            ) : analytics.error ? (
               <div className="h-64 flex items-center justify-center bg-gray-800 text-red-400">
-                {String(analytics.pageViews.error)}
+                {String(analytics.error)}
               </div>
             ) : (
               <div className="h-64">
-                {analytics.pageViews.data && (
+                {analytics.data?.pageViews && (
                   <PageViewsChart 
-                    pageViewsData={analytics.pageViews.data} 
+                    pageViewsData={analytics.data.pageViews} 
                   />
                 )}
               </div>
@@ -383,19 +383,19 @@ fetch("https://metrics-hub.netlify.app/api/track?key=${project.apiKey}&p=/curren
         </div>
         
         <div>
-          <DeviceTypeChart projectId={project.id} />
+          <DeviceTypeChart analytics={analytics.data} isLoading={analytics.isLoading} error={analytics.error ? String(analytics.error) : undefined} />
         </div>
         
         <div>
-          <ReferrerChart projectId={project.id} />
+          <ReferrerChart analytics={analytics.data} isLoading={analytics.isLoading} error={analytics.error ? String(analytics.error) : undefined} />
         </div>
         
         <div>
-          <TopCountriesChart projectId={project.id} />
+          <TopCountriesChart analytics={analytics.data} isLoading={analytics.isLoading} error={analytics.error ? String(analytics.error) : undefined} />
         </div>
         
         <div className="lg:col-span-3">
-          <TopPagesTable projectId={project.id} />
+          <TopPagesTable analytics={analytics.data} isLoading={analytics.isLoading} error={analytics.error ? String(analytics.error) : undefined} />
         </div>
       </div>
     </div>

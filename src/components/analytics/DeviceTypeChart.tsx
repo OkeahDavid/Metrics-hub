@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { 
   Chart as ChartJS, 
   ArcElement, 
@@ -17,52 +16,13 @@ interface DeviceData {
 }
 
 interface DeviceTypeChartProps {
-  projectId: string;
+  analytics?: { deviceTypes?: DeviceData[] };
+  isLoading?: boolean;
+  error?: string;
 }
 
-export default function DeviceTypeChart({ projectId }: DeviceTypeChartProps) {
-  const [deviceData, setDeviceData] = useState<DeviceData[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
-        // Add cache busting parameter
-        const response = await fetch(`/api/projects/${projectId}/device-types?t=${Date.now()}`);
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch device data');
-        }
-        
-        const data = await response.json();
-        console.log('Device data response:', data);
-        
-        // Handle both the new standardized format and the old format
-        const deviceTypes = data.success ? data.data : data.deviceTypes;
-        
-        if (deviceTypes && Array.isArray(deviceTypes)) {
-          setDeviceData(deviceTypes);
-        } else {
-          console.error('Invalid device data format:', data);
-          setError('Invalid data format received');
-        }
-      } catch (err) {
-        console.error('Error fetching device data:', err);
-        setError('Failed to load device data');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-
-    // Refresh more frequently during testing
-    const intervalId = setInterval(fetchData, 15000); // Update every 15 seconds
-    
-    return () => clearInterval(intervalId);
-  }, [projectId]);
+export default function DeviceTypeChart({ analytics, isLoading, error }: DeviceTypeChartProps) {
+  const deviceData = analytics?.deviceTypes || [];
 
   // Default data if no visits yet
   const getChartData = () => {
