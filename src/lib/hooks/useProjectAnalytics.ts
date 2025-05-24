@@ -21,13 +21,22 @@ interface ReferrerData {
 }
 
 interface TopPageData {
-  page: string;
+  path: string;
   count: number;
+  percentage: number;
 }
 
 interface CountryData {
   country: string;
   count: number;
+}
+
+export interface UnifiedAnalyticsData {
+  pageViews: PageViewsData[];
+  deviceTypes: DeviceTypeData[];
+  referrers: ReferrerData[];
+  topPages: TopPageData[];
+  countries: CountryData[];
 }
 
 export interface DateRange {
@@ -96,10 +105,10 @@ export function useProjectAnalytics(projectId: string) {
     }
   }, [projectId, queryClient]);
 
-  // Fetch page views data
-  const pageViews = useQuery({
-    queryKey: ['analytics', projectId, 'pageViews', fromDate, toDate],
-    queryFn: async (): Promise<PageViewsData[]> => {
+  // Fetch unified analytics data
+  const analytics = useQuery({
+    queryKey: ['analytics', projectId, fromDate, toDate],
+    queryFn: async (): Promise<UnifiedAnalyticsData> => {
       const params = new URLSearchParams({
         from: fromDate,
         to: toDate
@@ -108,87 +117,7 @@ export function useProjectAnalytics(projectId: string) {
         cache: 'force-cache'
       });
       if (!response.ok) {
-        throw new Error('Failed to fetch page views data');
-      }
-      const data = await response.json();
-      return data.success ? data.data : data;
-    },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
-
-  // Fetch device types data
-  const deviceTypes = useQuery({
-    queryKey: ['analytics', projectId, 'deviceTypes', fromDate, toDate],
-    queryFn: async (): Promise<DeviceTypeData[]> => {
-      const params = new URLSearchParams({
-        from: fromDate,
-        to: toDate
-      });
-      const response = await fetch(`/api/projects/${projectId}/device-types?${params}`, {
-        cache: 'force-cache'
-      });
-      if (!response.ok) {
-        throw new Error('Failed to fetch device types data');
-      }
-      const data = await response.json();
-      return data.success ? data.data : data;
-    },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
-
-  // Fetch referrers data
-  const referrers = useQuery({
-    queryKey: ['analytics', projectId, 'referrers', fromDate, toDate],
-    queryFn: async (): Promise<ReferrerData[]> => {
-      const params = new URLSearchParams({
-        from: fromDate,
-        to: toDate
-      });
-      const response = await fetch(`/api/projects/${projectId}/referrers?${params}`, {
-        cache: 'force-cache'
-      });
-      if (!response.ok) {
-        throw new Error('Failed to fetch referrers data');
-      }
-      const data = await response.json();
-      return data.success ? data.data : data;
-    },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
-
-  // Fetch top pages data
-  const topPages = useQuery({
-    queryKey: ['analytics', projectId, 'topPages', fromDate, toDate],
-    queryFn: async (): Promise<TopPageData[]> => {
-      const params = new URLSearchParams({
-        from: fromDate,
-        to: toDate
-      });
-      const response = await fetch(`/api/projects/${projectId}/top-pages?${params}`, {
-        cache: 'force-cache'
-      });
-      if (!response.ok) {
-        throw new Error('Failed to fetch top pages data');
-      }
-      const data = await response.json();
-      return data.success ? data.data : data;
-    },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
-
-  // Fetch countries data
-  const countries = useQuery({
-    queryKey: ['analytics', projectId, 'countries', fromDate, toDate],
-    queryFn: async (): Promise<CountryData[]> => {
-      const params = new URLSearchParams({
-        from: fromDate,
-        to: toDate
-      });
-      const response = await fetch(`/api/projects/${projectId}/countries?${params}`, {
-        cache: 'force-cache'
-      });
-      if (!response.ok) {
-        throw new Error('Failed to fetch countries data');
+        throw new Error('Failed to fetch analytics data');
       }
       const data = await response.json();
       return data.success ? data.data : data;
@@ -213,56 +142,20 @@ export function useProjectAnalytics(projectId: string) {
 
   // Detect when all queries have finished loading and reset loading state
   useEffect(() => {
-    if (isChangingRange && 
-        !pageViews.isLoading && 
-        !deviceTypes.isLoading && 
-        !referrers.isLoading && 
-        !topPages.isLoading && 
-        !countries.isLoading) {
+    if (isChangingRange && !analytics.isLoading) {
       setIsChangingRange(false);
     }
-  }, [
-    isChangingRange, 
-    pageViews.isLoading, 
-    deviceTypes.isLoading, 
-    referrers.isLoading, 
-    topPages.isLoading, 
-    countries.isLoading
-  ]);
+  }, [isChangingRange, analytics.isLoading]);
 
   // Calculate overall loading state
-  const isLoading = isChangingRange || 
-    pageViews.isLoading || 
-    deviceTypes.isLoading || 
-    referrers.isLoading || 
-    topPages.isLoading || 
-    countries.isLoading;
+  const isLoading = isChangingRange || analytics.isLoading;
 
+  // Provide unified analytics data to consumers
   return {
-    pageViews: {
-      data: pageViews.data,
-      isLoading: pageViews.isLoading,
-      error: pageViews.error,
-    },
-    deviceTypes: {
-      data: deviceTypes.data,
-      isLoading: deviceTypes.isLoading,
-      error: deviceTypes.error,
-    },
-    referrers: {
-      data: referrers.data,
-      isLoading: referrers.isLoading,
-      error: referrers.error,
-    },
-    topPages: {
-      data: topPages.data,
-      isLoading: topPages.isLoading,
-      error: topPages.error,
-    },
-    countries: {
-      data: countries.data,
-      isLoading: countries.isLoading,
-      error: countries.error,
+    analytics: {
+      data: analytics.data,
+      isLoading: analytics.isLoading,
+      error: analytics.error,
     },
     liveVisitors: {
       data: liveVisitors.data,

@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { 
   Chart as ChartJS, 
   ArcElement, 
@@ -22,38 +21,13 @@ interface CountryData {
 }
 
 interface TopCountriesChartProps {
-  projectId: string;
+  analytics?: { countries?: CountryData[] };
+  isLoading?: boolean;
+  error?: string;
 }
 
-export default function TopCountriesChart({ projectId }: TopCountriesChartProps) {
-  const [countryData, setCountryData] = useState<CountryData[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
-        const response = await fetch(`/api/projects/${projectId}/countries`);
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch country data');
-        }
-        
-        const data = await response.json();
-        // Handle both the new standardized format and the old format
-        const countries = data.success ? data.data : data.countries;
-        setCountryData(countries);
-      } catch (err) {
-        setError('Failed to load country data');
-        console.error(err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [projectId]);
+export default function TopCountriesChart({ analytics, isLoading, error }: TopCountriesChartProps) {
+  const countryData = analytics?.countries || [];
 
   // Default data if no visits yet
   const getChartData = () => {

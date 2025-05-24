@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { 
   Chart as ChartJS, 
   CategoryScale, 
@@ -27,39 +26,15 @@ interface ReferrerData {
   count: number;
 }
 
+// Accept analytics, isLoading, error as props instead of fetching internally
 interface ReferrerChartProps {
-  projectId: string;
+  analytics?: { referrers?: ReferrerData[] };
+  isLoading?: boolean;
+  error?: string;
 }
 
-export default function ReferrerChart({ projectId }: ReferrerChartProps) {
-  const [referrerData, setReferrerData] = useState<ReferrerData[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
-        const response = await fetch(`/api/projects/${projectId}/referrers`);
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch referrer data');
-        }
-        
-        const data = await response.json();
-        // Handle both the new standardized format and the old format
-        const referrers = data.success ? data.data : data.referrers;
-        setReferrerData(referrers);
-      } catch (err) {
-        setError('Failed to load referrer data');
-        console.error(err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [projectId]);
+export default function ReferrerChart({ analytics, isLoading, error }: ReferrerChartProps) {
+  const referrerData = analytics?.referrers || [];
 
   // Process data for chart - limit to top 5 referrers
   const processChartData = () => {

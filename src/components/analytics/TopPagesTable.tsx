@@ -1,7 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-
 interface PageData {
   path: string;
   count: number;
@@ -9,38 +7,13 @@ interface PageData {
 }
 
 interface TopPagesTableProps {
-  projectId: string;
+  analytics?: { topPages?: PageData[] };
+  isLoading?: boolean;
+  error?: string;
 }
 
-export default function TopPagesTable({ projectId }: TopPagesTableProps) {
-  const [pages, setPages] = useState<PageData[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
-        const response = await fetch(`/api/projects/${projectId}/top-pages`);
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch page data');
-        }
-        
-        const data = await response.json();
-        // Handle both the new standardized format and the old format
-        const pagesData = data.success ? data.data : data.pages;
-        setPages(pagesData);
-      } catch (err) {
-        setError('Failed to load page data');
-        console.error(err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [projectId]);
+export default function TopPagesTable({ analytics, isLoading, error }: TopPagesTableProps) {
+  const pages = analytics?.topPages || [];
 
   if (isLoading) {
     return (
