@@ -3,6 +3,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, useEffect, useCallback } from 'react';
 import { subDays } from 'date-fns';
+import { useDebounce } from '@/lib/hooks/useDebounce';
 
 // Define types for analytics data
 interface PageViewsData {
@@ -56,16 +57,18 @@ export function useProjectAnalytics(projectId: string) {
     to: new Date()
   });
 
-  // Convert dates to ISO strings for API calls
-  const fromDate = dateRange.from.toISOString();
-  const toDate = dateRange.to.toISOString();
+  // Debounce date range changes by 300ms
+  const debouncedDateRange = useDebounce(dateRange, 300);
+
+  // Convert dates to ISO strings for API calls - now using debounced values
+  const fromDate = debouncedDateRange.from.toISOString();
+  const toDate = debouncedDateRange.to.toISOString();
 
   // Enhanced date range setter with loading state
   const updateDateRange = useCallback((newRange: DateRange) => {
     setIsChangingRange(true);
     setDateRange(newRange);
   }, []);
-
   // This effect will prefetch data for common date ranges to improve performance
   useEffect(() => {
     // Prefetch data for common date ranges
@@ -103,7 +106,7 @@ export function useProjectAnalytics(projectId: string) {
     if (projectId && typeof window !== 'undefined') {
       prefetchCommonRanges();
     }
-  }, [projectId, queryClient]);
+  }, [projectId, queryClient, debouncedDateRange]);
 
   // Fetch unified analytics data
   const analytics = useQuery({

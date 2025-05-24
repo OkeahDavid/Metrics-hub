@@ -15,11 +15,18 @@ export default function DateRangeSelector({
   isLoading = false
 }: DateRangeSelectorProps) {
   const [activePreset, setActivePreset] = useState<PresetRange>('7d');
+  const [localIsLoading, setLocalIsLoading] = useState(false);
+  
+  // Combined loading state to prevent rapid firing
+  const combinedIsLoading = isLoading || localIsLoading;
 
   const handlePresetClick = (preset: PresetRange) => {
     // Don't process if already loading or if it's the same preset
-    if (isLoading || preset === activePreset) return;
+    if (combinedIsLoading || preset === activePreset) return;
 
+    // Set local loading state immediately to prevent double-clicks
+    setLocalIsLoading(true);
+    
     const now = new Date();
     let from: Date;
     
@@ -45,6 +52,11 @@ export default function DateRangeSelector({
 
     setActivePreset(preset);
     onChange({ from, to: now });
+    
+    // Reset local loading state after a short delay
+    setTimeout(() => {
+      setLocalIsLoading(false);
+    }, 300); // Match the debounce delay
   };
 
   const getButtonClass = (preset: PresetRange) => {
@@ -52,9 +64,8 @@ export default function DateRangeSelector({
       activePreset === preset
         ? 'bg-indigo-600 text-white'
         : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-    } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''} transition-colors duration-150`;
+    } ${combinedIsLoading ? 'opacity-50 cursor-not-allowed' : ''} transition-colors duration-150`;
   };
-
   return (
     <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center">
       <span className="text-sm text-gray-400 mr-2">Date Range:</span>
@@ -63,7 +74,7 @@ export default function DateRangeSelector({
           type="button"
           className={getButtonClass('7d')}
           onClick={() => handlePresetClick('7d')}
-          disabled={isLoading}
+          disabled={combinedIsLoading}
         >
           7 Days
         </button>
@@ -71,7 +82,7 @@ export default function DateRangeSelector({
           type="button"
           className={getButtonClass('14d')}
           onClick={() => handlePresetClick('14d')}
-          disabled={isLoading}
+          disabled={combinedIsLoading}
         >
           14 Days
         </button>
@@ -79,7 +90,7 @@ export default function DateRangeSelector({
           type="button"
           className={getButtonClass('30d')}
           onClick={() => handlePresetClick('30d')}
-          disabled={isLoading}
+          disabled={combinedIsLoading}
         >
           30 Days
         </button>
@@ -87,7 +98,7 @@ export default function DateRangeSelector({
           type="button"
           className={getButtonClass('90d')}
           onClick={() => handlePresetClick('90d')}
-          disabled={isLoading}
+          disabled={combinedIsLoading}
         >
           90 Days
         </button>
@@ -95,12 +106,12 @@ export default function DateRangeSelector({
           type="button"
           className={getButtonClass('all')}
           onClick={() => handlePresetClick('all')}
-          disabled={isLoading}
+          disabled={combinedIsLoading}
         >
           All Time
         </button>
       </div>
-      {isLoading && (
+      {combinedIsLoading && (
         <span className="text-sm text-gray-400 animate-pulse ml-2">Loading...</span>
       )}
     </div>
