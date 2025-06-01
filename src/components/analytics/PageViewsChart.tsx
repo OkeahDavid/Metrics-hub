@@ -38,9 +38,24 @@ interface PageViewsChartProps {
 
 export default function PageViewsChart({ pageViewsData = [] }: PageViewsChartProps) {
   const [chartType, setChartType] = useState<'line' | 'bar'>('line');
-  
-  // Process data for the chart
+    // Process data for the chart
   const chartData = useMemo(() => {
+    // Handle empty data
+    if (!pageViewsData || pageViewsData.length === 0) {
+      return {
+        labels: ['No Data'],
+        datasets: [
+          {
+            label: 'Page Views',
+            data: [0],
+            fill: false,
+            backgroundColor: 'rgba(99, 102, 241, 0.5)',
+            borderColor: 'rgb(99, 102, 241)',
+          },
+        ],
+      };
+    }
+
     // Format the dates for display
     const labels = pageViewsData.map(item => {
       try {

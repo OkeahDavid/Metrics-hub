@@ -22,11 +22,9 @@ interface CountryData {
 
 interface TopCountriesChartProps {
   analytics?: { countries?: CountryData[] };
-  isLoading?: boolean;
-  error?: string;
 }
 
-export default function TopCountriesChart({ analytics, isLoading, error }: TopCountriesChartProps) {
+export default function TopCountriesChart({ analytics }: TopCountriesChartProps) {
   const countryData = analytics?.countries || [];
 
   // Default data if no visits yet
@@ -97,20 +95,7 @@ export default function TopCountriesChart({ analytics, isLoading, error }: TopCo
       },
     },
   };
-
-  if (isLoading) {
-    return (
-      <div className="card h-full">
-        <div className="h-64 flex items-center justify-center">
-          <div className="h-40 w-40 rounded-full bg-gray-700 animate-pulse"></div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return <div className="h-64 flex items-center justify-center bg-gray-800 text-red-400">{error}</div>;
-  }
+  // Loading and error states are now handled by the parent component
 
   return (
     <div className="card h-full">

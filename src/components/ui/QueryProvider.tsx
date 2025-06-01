@@ -18,12 +18,16 @@ export default function QueryProvider({ children }: QueryProviderProps) {
       new QueryClient({
         defaultOptions: {
           queries: {
-            // Stale time of 1 minute by default
-            staleTime: 1000 * 60,
-            // Retry failed requests 1 time by default
+            // Increase stale time to reduce unnecessary refetches
+            staleTime: 1000 * 60 * 5, // 5 minutes
+            // Retry failed requests only once
             retry: 1,
-            // Refetch data when the window regains focus
-            refetchOnWindowFocus: true,
+            // Only refetch data when window regains focus and data is stale
+            refetchOnWindowFocus: 'always',
+            // Add cacheTime
+            gcTime: 1000 * 60 * 10, // 10 minutes
+            // Prevent React Query from continuously refetching data
+            refetchInterval: false
           },
         },
       })

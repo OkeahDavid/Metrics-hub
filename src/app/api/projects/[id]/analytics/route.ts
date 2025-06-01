@@ -64,9 +64,7 @@ export async function GET(request: NextRequest, props: Props) {
 
     if (!project) {
       return handleApiError(new Error('Project not found or access denied'), 'Project not found');
-    }
-
-    // Fetch all analytics data in parallel
+    }    // Fetch all analytics data in parallel
     const [
       pageViews,
       deviceTypes,
@@ -80,24 +78,27 @@ export async function GET(request: NextRequest, props: Props) {
       AnalyticsService.getTopPages(id, fromDate, toDate, 10),
       AnalyticsService.getTopCountries(id, fromDate, toDate, 5)
     ]);
-
-    // Unified analytics object
+    
+    // Unified analytics object with proper null handling
     const analytics = {
-      pageViews,
-      deviceTypes,
-      referrers,
-      topPages,
-      countries
+      pageViews: pageViews || [],
+      deviceTypes: deviceTypes || [],
+      referrers: referrers || [],
+      topPages: topPages || [],
+      countries: countries || []
     };
-
+      // Create a response with proper caching headers to prevent duplicate requests
     return createSuccessResponse(
       analytics,
       'Analytics data retrieved successfully',
       {
-        'Cache-Control': 'public, max-age=60' // Cache for 1 minute
+        'Cache-Control': 'public, max-age=300, stale-while-revalidate=600', // 5 min fresh, 10 min stale
+        'Content-Type': 'application/json',
+        'Vary': 'Accept-Encoding, Cookie'
       }
     );
   } catch (error) {
+    console.error('Analytics API error:', error);
     return handleApiError(error, 'Failed to fetch analytics data');
   }
 }
