@@ -8,34 +8,9 @@ interface PageData {
 
 interface TopPagesTableProps {
   analytics?: { topPages?: PageData[] };
-  isLoading?: boolean;
-  error?: string;
 }
 
-export default function TopPagesTable({ analytics, isLoading, error }: TopPagesTableProps) {
-  const pages = analytics?.topPages || [];
-
-  if (isLoading) {
-    return (
-      <div className="card">
-        <h3 className="text-lg text-gray-100 font-medium mb-4">Most Visited Pages</h3>
-        <div className="animate-pulse">
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="h-8 bg-gray-700 rounded mb-2"></div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="card">
-        <h3 className="text-lg text-gray-100 font-medium mb-4">Most Visited Pages</h3>
-        <div className="text-center text-red-400">{error}</div>
-      </div>
-    );
-  }
+export default function TopPagesTable({ analytics }: TopPagesTableProps) {  const pages = analytics?.topPages || [];
 
   return (
     <div className="card">

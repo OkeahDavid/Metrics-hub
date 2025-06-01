@@ -26,14 +26,12 @@ interface ReferrerData {
   count: number;
 }
 
-// Accept analytics, isLoading, error as props instead of fetching internally
+// Accept analytics as props
 interface ReferrerChartProps {
   analytics?: { referrers?: ReferrerData[] };
-  isLoading?: boolean;
-  error?: string;
 }
 
-export default function ReferrerChart({ analytics, isLoading, error }: ReferrerChartProps) {
+export default function ReferrerChart({ analytics }: ReferrerChartProps) {
   const referrerData = analytics?.referrers || [];
 
   // Process data for chart - limit to top 5 referrers
@@ -109,20 +107,7 @@ export default function ReferrerChart({ analytics, isLoading, error }: ReferrerC
       }
     }
   };
-
-  if (isLoading) {
-    return (
-      <div className="card h-full">
-        <div className="h-64 flex items-center justify-center">
-          <div className="w-full h-32 bg-gray-700 rounded animate-pulse"></div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return <div className="h-64 flex items-center justify-center bg-gray-800 text-red-400">{error}</div>;
-  }
+  // Loading and error states are now handled by the parent component
 
   return (
     <div className="card h-full">

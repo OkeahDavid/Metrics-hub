@@ -8,7 +8,6 @@ import ReferrerChart from '@/components/analytics/ReferrerChart';
 import TopPagesTable from '@/components/analytics/TopPagesTable';
 import LiveVisitors from '@/components/analytics/LiveVisitors';
 import TopCountriesChart from '@/components/analytics/TopCountriesChart';
-import DateRangeSelector from '@/components/analytics/DateRangeSelector';
 import CopyToClipboard from '@/components/ui/CopyToClipboard';
 import ExportDataButton from '@/components/analytics/ExportDataButton';
 import { ToastContainer, toast } from 'react-toastify';
@@ -23,9 +22,9 @@ export default function ProjectPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showInstallation, setShowInstallation] = useState(false);
-  
-  // Use our improved analytics hook
-  const { analytics, isLoading, setDateRange } = useProjectAnalytics(id);
+    // Use our improved analytics hook with proper destructuring
+  const { analytics } = useProjectAnalytics(id);
+  const isLoading = analytics.isLoading;
 
   const fetchProject = useCallback(async () => {
     try {
@@ -73,8 +72,7 @@ export default function ProjectPage() {
   return (
     <div className="space-y-6">
       <ToastContainer position="top-right" autoClose={3000} />
-      
-      <div className="flex flex-col md:flex-row md:justify-between md:items-center space-y-4 md:space-y-0">
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center space-y-4 md:space-y-0">
         <h2 className="text-2xl font-bold text-gray-100">{project.name} - Analytics</h2>
         <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
           <button
@@ -85,14 +83,6 @@ export default function ProjectPage() {
           </button>
           <ExportDataButton projectId={project.id} projectName={project.name} />
         </div>
-      </div>
-      
-      {/* Date range selector */}
-      <div className="bg-gray-800 p-4 rounded-lg shadow-sm">
-        <DateRangeSelector 
-          onChange={setDateRange} 
-          isLoading={isLoading} 
-        />
       </div>
       
       {/* Installation section - now collapsible */}
@@ -352,26 +342,36 @@ fetch("https://metrics-hub.netlify.app/api/track?key=${project.apiKey}&p=/curren
           </div>
         </div>
       )}
-      
-      {/* Main analytics dashboard */}
-      <div className={`grid grid-cols-1 lg:grid-cols-3 gap-6 ${isLoading ? 'opacity-70' : ''}`}>
-        <div className="lg:col-span-2">
+        {/* Main analytics dashboard */}
+      <div className={`grid grid-cols-1 lg:grid-cols-3 gap-6 ${isLoading ? 'opacity-70' : ''}`}>        <div className="lg:col-span-2">
           <div className="card h-full">
             <h3 className="text-lg text-gray-100 font-medium mb-4">Page Views</h3>
             {analytics.isLoading ? (
               <div className="h-64 flex items-center justify-center">
                 <div className="w-full h-32 bg-gray-700 rounded animate-pulse"></div>
               </div>
-            ) : analytics.error ? (
-              <div className="h-64 flex items-center justify-center bg-gray-800 text-red-400">
-                {String(analytics.error)}
+            ) : analytics.error ? (              <div className="h-64 flex items-center justify-center bg-gray-800 text-red-400">
+                <div>
+                  <p>Error loading chart data</p>
+                  <p className="text-sm">{String(analytics.error)}</p>
+                  <button 
+                    onClick={() => window.location.reload()}
+                    className="mt-2 px-3 py-1 bg-indigo-600 text-white rounded text-sm"
+                  >
+                    Retry
+                  </button>
+                </div>
               </div>
             ) : (
               <div className="h-64">
-                {analytics.data?.pageViews && (
+                {analytics.data && analytics.data.pageViews && analytics.data.pageViews.length > 0 ? (
                   <PageViewsChart 
                     pageViewsData={analytics.data.pageViews} 
                   />
+                ) : (
+                  <div className="h-64 flex items-center justify-center bg-gray-800 text-gray-400">
+                    No page views data available
+                  </div>
                 )}
               </div>
             )}
@@ -381,21 +381,82 @@ fetch("https://metrics-hub.netlify.app/api/track?key=${project.apiKey}&p=/curren
         <div>
           <LiveVisitors projectId={project.id} />
         </div>
-        
-        <div>
-          <DeviceTypeChart analytics={analytics.data} isLoading={analytics.isLoading} error={analytics.error ? String(analytics.error) : undefined} />
+          <div>
+          <div className="card h-full">
+            <h3 className="text-lg text-gray-100 font-medium mb-4">Device Types</h3>
+            {analytics.isLoading ? (
+              <div className="h-64 flex items-center justify-center">
+                <div className="w-full h-32 bg-gray-700 rounded animate-pulse"></div>
+              </div>
+            ) : analytics.error ? (
+              <div className="h-64 flex items-center justify-center bg-gray-800 text-red-400">
+                <div>
+                  <p>Error loading chart data</p>
+                  <p className="text-sm">{String(analytics.error)}</p>
+                </div>
+              </div>
+            ) : (
+              <DeviceTypeChart analytics={analytics.data} />
+            )}
+          </div>
         </div>
         
         <div>
-          <ReferrerChart analytics={analytics.data} isLoading={analytics.isLoading} error={analytics.error ? String(analytics.error) : undefined} />
+          <div className="card h-full">
+            <h3 className="text-lg text-gray-100 font-medium mb-4">Referrers</h3>
+            {analytics.isLoading ? (
+              <div className="h-64 flex items-center justify-center">
+                <div className="w-full h-32 bg-gray-700 rounded animate-pulse"></div>
+              </div>
+            ) : analytics.error ? (
+              <div className="h-64 flex items-center justify-center bg-gray-800 text-red-400">
+                <div>
+                  <p>Error loading chart data</p>
+                  <p className="text-sm">{String(analytics.error)}</p>
+                </div>
+              </div>
+            ) : (
+              <ReferrerChart analytics={analytics.data} />
+            )}
+          </div>
         </div>
         
         <div>
-          <TopCountriesChart analytics={analytics.data} isLoading={analytics.isLoading} error={analytics.error ? String(analytics.error) : undefined} />
+          <div className="card h-full">
+            <h3 className="text-lg text-gray-100 font-medium mb-4">Top Countries</h3>
+            {analytics.isLoading ? (
+              <div className="h-64 flex items-center justify-center">
+                <div className="w-full h-32 bg-gray-700 rounded animate-pulse"></div>
+              </div>
+            ) : analytics.error ? (
+              <div className="h-64 flex items-center justify-center bg-gray-800 text-red-400">
+                <div>
+                  <p>Error loading chart data</p>
+                  <p className="text-sm">{String(analytics.error)}</p>
+                </div>
+              </div>
+            ) : (
+              <TopCountriesChart analytics={analytics.data} />
+            )}
+          </div>
         </div>
         
         <div className="lg:col-span-3">
-          <TopPagesTable analytics={analytics.data} isLoading={analytics.isLoading} error={analytics.error ? String(analytics.error) : undefined} />
+          <div className="card h-full">
+            <h3 className="text-lg text-gray-100 font-medium mb-4">Top Pages</h3>
+            {analytics.isLoading ? (
+              <div className="h-32 flex items-center justify-center">
+                <div className="w-full h-24 bg-gray-700 rounded animate-pulse"></div>
+              </div>
+            ) : analytics.error ? (
+              <div className="p-4 bg-gray-800 text-red-400 text-center">
+                <p>Error loading table data</p>
+                <p className="text-sm">{String(analytics.error)}</p>
+              </div>
+            ) : (
+              <TopPagesTable analytics={analytics.data} />
+            )}
+          </div>
         </div>
       </div>
     </div>
