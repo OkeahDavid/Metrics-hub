@@ -32,6 +32,11 @@ export default function GlobalNav() {
     { href: '/profile', label: 'Profile' },
   ];
   
+  // Add admin link if user is superuser
+  if (session?.user?.isSuperUser) {
+    navLinks.push({ href: '/admin', label: 'Admin Panel' });
+  }
+  
   // Helper function to check if a link is active
   const isActive = (path: string) => {
     if (path === '/dashboard') {

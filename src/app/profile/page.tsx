@@ -2,7 +2,6 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { redirect } from 'next/navigation';
 import prisma from '@/lib/db';
-import Toggle from "@/components/profile/Toggle";
 
 export default async function ProfilePage() {
   const session = await getServerSession(authOptions);
@@ -46,11 +45,6 @@ export default async function ProfilePage() {
                   </span>
                 )}
               </dd>
-            </div>
-            
-            {/* Toggle superuser status (demo purposes only) */}
-            <div className="bg-gray-700 px-4 py-5 sm:px-6">
-              <Toggle userId={user.id} isSuperUser={user.isSuperUser} />
             </div>
           </dl>
         </div>

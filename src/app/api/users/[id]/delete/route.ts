@@ -4,13 +4,7 @@ import prisma from "@/lib/db";
 import { handleApiError } from "@/lib/error-handler";
 import { createSuccessResponse } from "@/lib/api-response";
 
-interface UserResponse {
-  id: string;
-  username: string;
-  isSuperUser: boolean;
-}
-
-export async function POST(
+export async function DELETE(
   request: Request,
   { params }: { params: { id: string } }
 ) {
@@ -24,45 +18,51 @@ export async function POST(
       );
     }
 
-    // Only superusers can toggle other users' status
+    // Only superusers can delete users
     if (!session.user.isSuperUser) {
       return handleApiError(
         new Error("Insufficient permissions"),
-        "Only administrators can modify user permissions",
+        "Only administrators can delete users"
       );
     }
 
     const userId = params.id;
+    
+    // Prevent deleting yourself
+    if (userId === session.user.id) {
+      return handleApiError(
+        new Error("Cannot delete own account"),
+        "You cannot delete your own account"
+      );
+    }
+
+    // Check if user exists
     const user = await prisma.user.findUnique({
       where: { id: userId },
+      include: {
+        _count: {
+          select: { projects: true }
+        }
+      }
     });
 
     if (!user) {
       return handleApiError(
         new Error("User not found"),
-        "The specified user could not be found",
+        "The specified user could not be found"
       );
     }
 
-    // Toggle superuser status
-    const updatedUser = await prisma.user.update({
-      where: { id: userId },
-      data: { isSuperUser: !user.isSuperUser },
+    // Delete user (this will cascade delete their projects and page views)
+    await prisma.user.delete({
+      where: { id: userId }
     });
 
-    const response: UserResponse = {
-      id: updatedUser.id,
-      username: updatedUser.username,
-      isSuperUser: updatedUser.isSuperUser,
-    };
-
     return createSuccessResponse(
-      response,
-      updatedUser.isSuperUser 
-        ? "User was granted administrator privileges" 
-        : "Administrator privileges were revoked"
+      { deletedUser: user.username, deletedProjects: user._count.projects },
+      `User ${user.username} and ${user._count.projects} project(s) deleted successfully`
     );
   } catch (error) {
-    return handleApiError(error, "Failed to update user permissions");
+    return handleApiError(error as Error, "Failed to delete user");
   }
 }
