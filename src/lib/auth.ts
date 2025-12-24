@@ -33,6 +33,12 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
+        // Update last login time
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { lastLogin: new Date() }
+        });
+
         return {
           id: user.id,
           username: user.username,
