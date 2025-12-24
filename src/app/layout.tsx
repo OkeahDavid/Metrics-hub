@@ -21,6 +21,12 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "Metrics Hub",
   description: "Create and manage your projects with ease.",
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/icon.tsx', sizes: '32x32' },
+    ],
+  },
 };
 
 export default function RootLayout({
