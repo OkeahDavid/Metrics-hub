@@ -31,7 +31,7 @@ export async function POST(
         "Only administrators can modify user permissions",
       );
     }
-    
+
     const userId = params.id;
     const user = await prisma.user.findUnique({
       where: { id: userId },
