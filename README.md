@@ -2,6 +2,9 @@
 
 A lightweight, privacy-focused analytics platform for tracking website statistics across multiple projects.
 
+<img width="998" height="841" alt="image" src="https://github.com/user-attachments/assets/2d66c378-6048-432b-af4b-c034bf3eecb7" />
+
+
 ## Features
 
 - **Anonymous Data Collection**: Track visitor metrics without collecting personally identifiable information
