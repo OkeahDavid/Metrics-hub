@@ -25,6 +25,7 @@ export default function ProjectPage() {
     // Use our improved analytics hook with proper destructuring
   const { analytics } = useProjectAnalytics(id);
   const isLoading = analytics.isLoading;
+  const trackingOrigin = typeof window !== 'undefined' ? window.location.origin : '';
 
   const fetchProject = useCallback(async () => {
     try {
@@ -143,7 +144,7 @@ export default function ProjectPage() {
     .then(response => response.json())
     .then(data => {
       // Send pageview data with location info
-      fetch('https://metrics-hub.netlify.app/api/track', {
+      fetch('${trackingOrigin}/api/track', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -163,7 +164,7 @@ export default function ProjectPage() {
     .catch(err => {
       // Fall back to sending data without location info
       console.error('Country detection error:', err);
-      fetch('https://metrics-hub.netlify.app/api/track', {
+      fetch('${trackingOrigin}/api/track', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -207,7 +208,7 @@ export default function ProjectPage() {
     .then(response => response.json())
     .then(data => {
       // Send pageview data with location info
-      fetch('https://metrics-hub.netlify.app/api/track', {
+      fetch('${trackingOrigin}/api/track', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -227,7 +228,7 @@ export default function ProjectPage() {
     .catch(err => {
       // Fall back to sending data without location info
       console.error('Country detection error:', err);
-      fetch('https://metrics-hub.netlify.app/api/track', {
+      fetch('${trackingOrigin}/api/track', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -261,10 +262,10 @@ export default function ProjectPage() {
                   <div className="mb-3">
                     <h6 className="text-xs font-medium text-gray-300 mb-1">HTML Image Pixel</h6>
                     <pre className="bg-gray-800 text-gray-100 p-2 rounded-md overflow-x-auto text-xs">
-                      {`<img src="https://metrics-hub.netlify.app/api/track?key=${project.apiKey}&p=/current-page" width="1" height="1" alt="" style="display:none" />`}
+                      {`<img src="${trackingOrigin}/api/track?key=${project.apiKey}&p=/current-page" width="1" height="1" alt="" style="display:none" />`}
                     </pre>
                     <CopyToClipboard 
-                      text={`<img src="https://metrics-hub.netlify.app/api/track?key=${project.apiKey}&p=/current-page" width="1" height="1" alt="" style="display:none" />`}
+                      text={`<img src="${trackingOrigin}/api/track?key=${project.apiKey}&p=/current-page" width="1" height="1" alt="" style="display:none" />`}
                       onCopy={() => toast.success('Image pixel code copied to clipboard!')}
                     >
                       <button className="mt-1 px-2 py-1 text-xs text-indigo-400 hover:bg-gray-700 rounded-md">
@@ -277,11 +278,11 @@ export default function ProjectPage() {
                     <h6 className="text-xs font-medium text-gray-300 mb-1">Server-side Integration</h6>
                     <pre className="bg-gray-800 text-gray-100 p-2 rounded-md overflow-x-auto text-xs">
                       {`// Node.js server-side example
-fetch("https://metrics-hub.netlify.app/api/track?key=${project.apiKey}&p=/current-page&r=referrer-url", { method: "GET" });`}
+fetch("${trackingOrigin}/api/track?key=${project.apiKey}&p=/current-page&r=referrer-url", { method: "GET" });`}
                     </pre>
                     <CopyToClipboard 
                       text={`// Node.js server-side example
-fetch("https://metrics-hub.netlify.app/api/track?key=${project.apiKey}&p=/current-page&r=referrer-url", { method: "GET" });`}
+fetch("${trackingOrigin}/api/track?key=${project.apiKey}&p=/current-page&r=referrer-url", { method: "GET" });`}
                       onCopy={() => toast.success('Server-side code copied to clipboard!')}
                     >
                       <button className="mt-1 px-2 py-1 text-xs text-indigo-400 hover:bg-gray-700 rounded-md">

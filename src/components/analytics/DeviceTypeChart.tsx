@@ -39,35 +39,24 @@ export default function DeviceTypeChart({ analytics }: DeviceTypeChartProps) {
       };
     }
 
-    // Create a map of device types for more reliable data
-    const deviceMap = {
-      desktop: 0,
-      mobile: 0,
-      tablet: 0
+    // Fixed color per device type, so a type keeps its color regardless of
+    // which other types are present in this project's data.
+    const deviceColors: Record<string, string> = {
+      desktop: 'rgba(99, 102, 241, 0.7)',  // Indigo
+      mobile: 'rgba(16, 185, 129, 0.7)',   // Green
+      tablet: 'rgba(245, 158, 11, 0.7)',   // Amber
     };
-    
-    // Fill the map with actual data
-    deviceData.forEach(item => {
-      if (item.deviceType && ['desktop', 'mobile', 'tablet'].includes(item.deviceType)) {
-        if (item.deviceType in deviceMap) {
-          deviceMap[item.deviceType as keyof typeof deviceMap] = item.count;
-        }
-      }
-    });
-    
-    console.log('Processed device map:', deviceMap);
-    
-    // Create chart data from the map
+
+    // Only include device types that actually have visits, so the legend
+    // doesn't list a type (e.g. tablet) with a count of zero.
+    const present = deviceData.filter(item => item.deviceType in deviceColors && item.count > 0);
+
     return {
-      labels: Object.keys(deviceMap),
+      labels: present.map(item => item.deviceType),
       datasets: [
         {
-          data: Object.values(deviceMap),
-          backgroundColor: [
-            'rgba(99, 102, 241, 0.7)',  // Indigo (desktop)
-            'rgba(16, 185, 129, 0.7)',  // Green (mobile)
-            'rgba(245, 158, 11, 0.7)',  // Amber (tablet)
-          ],
+          data: present.map(item => item.count),
+          backgroundColor: present.map(item => deviceColors[item.deviceType]),
           borderWidth: 1,
           borderColor: '#374151', // gray-700 for dark theme border
         },
